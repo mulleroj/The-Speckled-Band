@@ -5,7 +5,11 @@
 **HEAD at approval record (before this documentation commit):** `aea5023`
 **Stable asset ID:** `char.series.baker-street-cases.holmes.master`
 **Approved version:** **Sherlock Holmes Master v01**
-**Reference supplied by author:** attached image `codex-clipboard-0b030470-2724-4ccc-926f-0eefa3161656.png` (1024 × 1536 px). This attachment is the approval reference; this task does not copy it into the repository or generate a replacement.
+**Canonical approved file:** `assets/visual/masters/characters/holmes/char.series.baker-street-cases.holmes.master__v01__approved.png`
+**Dimensions:** 1024 × 1536 px
+**SHA-256:** `b957525afe4bc3c04379c864fa25e87d886520a6a1b5b733e2ea2817f6007926`
+
+The canonical approved file above is the binding visual reference for all future Sherlock illustrations. It was imported from the author's supplied `Sherlock_Master_v01_asset.zip`; its PNG signature, dimensions and SHA-256 were verified against the supplied values. Do not substitute the temporary chat attachment or another image when creating variants.
 
 ## Approved likeness
 
@@ -37,4 +41,4 @@ All future Sherlock portraits, poses, expressions and scene illustrations must u
 
 ## Approval boundary
 
-Master v01 is approved as Sherlock's visual identity reference. This does not approve any of the five planned variants, a scene illustration, runtime integration, or a new asset file. No new image was generated in this documentation task. The source reference is currently the user-provided attachment; an enduring repository asset path remains to be chosen if the project later needs one.
+Master v01 is approved as Sherlock's visual identity reference. This does not approve any of the five planned variants, a scene illustration or runtime integration. No new image was generated in this import task; the approved source image was registered at the canonical repository path above.
