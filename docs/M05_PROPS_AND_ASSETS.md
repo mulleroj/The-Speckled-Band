@@ -1,0 +1,29 @@
+# M05.1 — Props and Asset Bible
+
+**Status:** inventory and design decisions only. No prop art or files are created here.
+**Principle:** a prop may clarify an already stated observation; it must not introduce a clue, motive, or solution ahead of the approved scene.
+
+| Prop / asset | Function and visual treatment | Continuity / spoiler boundary | Separate master? |
+|---|---|---|---|
+| Watson's notebook | Adaptation prop for Watson's first-person act of recording; small, worn but usable paper notebook and pencil. Keep pages blank or with non-legible marks unless the approved text shows the writing. | Chapter II says Watson opens it after Helen gathers her veil. Do not imply that the notebook is the persistent Case File UI. | **Yes**, one neutral closed/open pair and hand scale reference. |
+| Case File | In-app chronological evidence record, not a canonical physical volume depicted in the 1892 story. Visual design is the current dialog/card UI: dark teal, ivory copy, muted gold labels and borders. | Preserve source, evidence type and chronological text; do not fabricate handwriting or add undiscovered records. | **No standalone image master.** UI component styling stays in product design. |
+| Evidence Board | In-app board grouping observations, testimony/research and hypotheses. A conceptual interface, not a physical board in the story world. | Must not show future evidence, undiscovered links, or a correct answer before earned. Keep keyboard/tab behavior and text-only accessibility intact. | **No physical prop master.** If later visually refined, treat as UI design, not scene art. |
+| Steel fireplace poker | Establishes Roylott's strength and the Baker Street threat; steel bar with credible fireplace wear and a distinct straight/bent state. No sharp or weaponized embellishment. | Bent in Chapter II S03, visible after Roylott leaves, straightened by Holmes in S04. Do not imply it was present at Julia's death or prove a cause. Keep scale/grip consistent. | **Yes**, straight, bent, and held/hand scale turnarounds. |
+| Mrs Stoner's will | Source document consulted by Holmes at Doctors' Commons; not read directly by Watson in Chapter II. Design a restrained Victorian legal paper with non-legible or blocked text for illustration unless exact words are authorized. | The adaptation reports figures through Holmes. Never fabricate clauses, signatures, seals, or a legible financial mechanism. It is not a player-discovered document. | **Yes**, one generic closed/partial sheet master if a later scene needs the paper. No readable facsimile. |
+| Holmes's financial notes | Blue paper with handwritten figures in the original; adapted Chapter II S05 likewise says Holmes returns with blue paper of figures. | The report is Holmes's research, not Watson's direct inspection. Show only figures already stated in that scene; no invented clauses or extra financial marks. | **Yes**, one sheet master and restrained handwriting treatment. |
+| Railway ticket | Partial return ticket in Helen's left glove at Chapter I observation. It supports train travel; it does not identify all of her route by itself. | Keep in the same left glove/hand and at the scale described. Text records the observation; the image must not reveal unreadable route details as a hidden clue. | **Yes**, small ticket front/back silhouette or single legible-safe master; avoid fake fine print. |
+| Glove, veil, sleeve and mud | Costume/continuity assets supporting Helen's arrival and travel. The ticket is partly visible in the left glove; fresh mud appears on the left sleeve in Chapter I. | Keep hand, sleeve, ticket, mud position and veil consistent across Chapter I shots. Marks on Helen's wrist are shown only after consent in Chapter II. | **No individual masters** beyond Helen's character turnaround and detail sheet; create detail crop references within that sheet. |
+| Fire, fireplace, and room fittings | Environmental recurring elements for Baker Street. Fire establishes warmth and time-of-day mood; poker rests at the hearth. | Position within the locked room plan. Fire never obscures a person or evidence. No extra weapon props. | Covered by the **Baker Street location master**, with a poker asset separately tracked. |
+| Door, key, shutters and room fixtures | Future investigation objects only when specifically present and observed in an approved later scene. | Do not stage, label, emphasize, or reveal the eventual solution through them before Watson's scene reaches the relevant facts. Do not fabricate an evidence-bearing state. | **Deferred** until an approved scene plan identifies the exact object and view. |
+| Railway carriage and cab | Setting assets for transition to Waterloo and train departure. The cab is part of the trip; Chapter II ends at train departure. | No arrival image, Leatherhead platform, or manor in the Chapter II departure asset. Keep late-Victorian design and travel direction consistent. | Carriage is part of **Waterloo location master**; cab can be a reusable location/transport sub-asset if a scene needs it. |
+
+## Asset categories and source labels
+
+- **Character master:** approved reusable likeness and costume baseline.
+- **Location master:** approved geometry, materials, light and camera references.
+- **Prop master:** isolated, repeatable object view with relevant state variants.
+- **Scene illustration:** a one-scene composition built from approved masters.
+- **UI asset:** interface component or icon; never label a fictional UI element as a canonical story object.
+- **Decorative asset:** atmosphere with no story fact; use empty alt text when decorative.
+
+Every asset record must state its source (1892 text, approved adaptation, or original design decision), first permitted scene, stable ID, version, approval state, accessibility text, and continuity dependencies. Use `source: null` until an approved file exists; do not make a manifest entry imply that an asset has been generated.
