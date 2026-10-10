@@ -41,4 +41,4 @@ All future Sherlock portraits, poses, expressions and scene illustrations must u
 
 ## Approval boundary
 
-Master v01 is approved as Sherlock's visual identity reference. This does not approve any of the five planned variants, a scene illustration or runtime integration. No new image was generated in this import task; the approved source image was registered at the canonical repository path above.
+Master v01 is approved as Sherlock's primary visual identity reference. Thinking Pose v01 and Seated Study v01 are separately approved supplementary pose references in `docs/M05_2_SHERLOCK_VARIANTS_LOCK.md`; they do not replace or redefine the master. The other planned variants, scene illustrations and runtime integration are not approved by these locks. No new image was generated in this import task; the two author-approved source images were registered at their canonical repository paths.
