@@ -11,7 +11,7 @@
 | `art.case01.ch02.s03.baker-street-visitor` | S03 | Roylott appears in doorway with the poker/fireplace in frame. Watson's point of view; do not frame him as a fantasy monster or make threat into comedy. | “Dr Roylott stands in the open doorway, holding a riding crop.” |
 | `art.case01.ch02.s04.poker` | S04 | Focus on the bent poker and Holmes's hands as he straightens it; no impact or injury image. | “Roylott has bent the steel poker. Holmes is forcing it straight.” |
 | `art.case01.ch02.s05.will-notes` | S05 | Holmes returns with a small paper of notes; figures may appear only when explained in the text. Avoid a legible will facsimile with invented clauses. | “Holmes shows Watson a page of figures from his research.” |
-| `art.case01.ch02.s06.departure` | S06 | Cab leaving a London street toward the station. End at the city boundary; do not show Stoke Moran yet. | “Holmes and Watson leave London by cab.” |
+| `art.case01.ch02.s06.departure` | S06 | Cab to Waterloo and a brief boarding/departure image if one frame can convey it without implying arrival at Leatherhead. Keep Stoke Moran out of frame. | “Holmes and Watson board a train at Waterloo; the journey to Leatherhead begins.” |
 
 ## Art and accessibility rules
 

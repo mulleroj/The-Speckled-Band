@@ -1,53 +1,49 @@
-# M03 — Chapter II story and game design
+# M03.2 — Chapter II story and game design
 
-**Story direction:** creator-approved. **Six-scene structure:** required. **Script:** final review draft in `docs/chapters/ch02/SCRIPT.md`; not runtime authorization.
 **Case:** *The Speckled Band*, The Baker Street Cases.
 **Chapter II:** *The Man from Stoke Moran*.
+**Structure:** six-scene sequence retained from author review.
+**Current status:** `M03 SCRIPT LOCKED – APPROVED FOR M04` (2026-10-10). The six-scene script is author-approved; runtime implementation and media production have not begun.
 
-## Approved chapter arc
+## Revised chapter arc
 
-Watson and Holmes continue the Baker Street interview, recognise Helen's danger without taking control away from her, discuss what her account leaves unexplained, face Roylott's threat, separate violent conduct from proof about Julia's death, learn the possible financial motive, and leave London for Stoke Moran. The player may express different investigative thoughts; canonical events and the final solution do not change.
+Watson continues Helen's Baker Street interview, observes the wrist marks with her consent, and hears her account of both sisters' marriage plans. Holmes and Watson consider what remains unknown, face Roylott's threat, distinguish his violent conduct from proof about Julia's death, and examine the possible financial motive only after the player has reasoned from the figures. They then board a train at Waterloo. The chapter ends on departure; Chapter III owns arrival and the safety conversation at Stoke Moran.
 
-| ID | Approved title | Story purpose | Player activity |
+| Scene ID | Title | Story purpose | Player activity |
 | --- | --- | --- | --- |
-| `ch02.s01.hidden-bruises` | The Hidden Bruises | Observe the marks on Helen's wrist, listen to her explanation, agree to meet at Stoke Moran. | Observation versus testimony versus unsupported inference; Watson responds with care. |
-| `ch02.s02.difficult-puzzle` | A Difficult Puzzle | After Helen leaves, Watson and Holmes state what the reported whistle and final words do not explain. | Choose a cautious preliminary thought; feedback names the uncertainty. |
-| `ch02.s03.unwelcome-visitor` | The Unwelcome Visitor | Roylott traces Helen to Baker Street, threatens Holmes and Watson, bends the poker. | Watson chooses how to respond; the event and evidence grants remain canonical. |
-| `ch02.s04.bent-poker` | The Bent Poker | Holmes straightens the poker and worries that Roylott followed Helen. | Separate witnessed strength/threat from proof about Julia's death. |
-| `ch02.s05.price-of-marriage` | The Price of Marriage | Holmes reports his research into the will and the possible loss of income on marriage. | Deduce a possible motive while rejecting “motive proves murder.” |
-| `ch02.s06.journey-begins` | The Journey Begins | Holmes and Watson prepare and leave London. | Summarise known, reported, inferred, and unknown; select a question for the next chapter. |
+| `ch02.s01.hidden-bruises` | The Hidden Bruises | Continue the interview before Helen leaves. Observe five wrist marks, hear Helen's explanation and marriage context, arrange the same-day visit. | Watson responds with care; distinguish observation, testimony, and unsupported inference. |
+| `ch02.s02.difficult-puzzle` | A Difficult Puzzle | After Helen leaves, Holmes invites Watson's cautious reading of the low whistle and last words from Chapter I. | Select the best-supported hypothesis without importing clues that the adaptation has not taught. |
+| `ch02.s03.unwelcome-visitor` | The Unwelcome Visitor | Roylott traces Helen, threatens Holmes and Watson, bends the fireplace poker; Holmes diverts him with restrained dry humour. | Watson chooses to observe quietly or name the threat. Events and evidence are invariant. |
+| `ch02.s04.bent-poker` | The Bent Poker | Holmes straightens the iron. Watson worries about Helen. Holmes leaves to check the legal record. | Decide what the Baker Street poker event can support before Holmes comments. |
+| `ch02.s05.price-of-marriage` | The Price of Marriage | Later that morning Holmes reports his figures from the will and investment values. | Use the stated £750/£250 figures and both marriage facts to infer a possible motive without treating it as proof. Holmes responds after the attempt. |
+| `ch02.s06.journey-begins` | The Journey Begins | Holmes and Watson travel by cab to Waterloo, board for Leatherhead, and the train departs. | Choose a useful open question for the house; every option is valid and non-blocking. |
 
-Chapter II ends as the cab leaves London. Chapter III begins upon arrival at Stoke Moran and must establish Helen's safety guidance before the room investigation. The Case File recap is an optional read-only panel, not a seventh scene.
+## Continuity, evidence, and learning contract
 
-## Continuity decision
+- Current Chapter I ends before Helen leaves, but omits the wrist event and Helen's own upcoming marriage. S01 is explicitly a continuation of the Baker Street interview. Helen states both marriage facts as testimony; Chapter I runtime is not changed.
+- Optional standalone recap is source-labelled context, not new or seeded evidence. Helen's marriage context is also stated in S01 and repeated in the S05 prompt; no unavailable clue is required.
+- Four stable evidence IDs remain: `helen-wrist-marks`, `roylott-threat`, `bent-poker`, `marriage-income`. First three are direct observations; the last is a reported research result. The possible motive is an inference, never stored as fact.
+- Grants occur automatically at narrated source events. Every challenge is retryable without penalty. No answer can alter the canonical people, danger, evidence, or outcome.
+- Watson narration and Holmes's restrained, dry wit are strengthened. Every scene has teacher-facing B1 vocabulary, language goal, comprehension questions, and a critical-thinking prompt; activity answer guidance remains post-attempt.
+- No room inspection, solution mechanism, animal, match, metal sound, blocked exit, or other fact omitted from Chapter I is introduced.
 
-The current Chapter I closing asks to examine Stoke Moran and ends with “The first case file is open. The mystery has only begun.” It does not say Helen has left. Approved S01 therefore continues the interview before she departs; no Chapter I implementation change is required. S01 formalises the visit already foreshadowed at the Chapter I end.
+## Chapter III handoff
 
-The original notices the wrist before arranging the visit; the existing Chapter I adaptation states the general intention to visit earlier. S01 observes the wrist immediately after that line and makes the same-day plan concrete. This small staging compression is documented in `docs/chapters/ch02/SOURCE_FIDELITY.md`; no player fact or event is changed. If this order is later rejected, changing Chapter I requires a separate approval.
+Chapter II ends at train departure from Waterloo. Chapter III must orient the route to Leatherhead and the remaining journey to Stoke Moran, reintroduce Helen, and include the source-based safety conversation before room investigation. The murder motive remains a lead for inquiry, not a solved verdict. No save migration or Chapter III runtime behavior is authorized by these design documents.
 
-## Canon and learning guardrails
+## Canonical M03.2 documents
 
-- One evidence source of truth; distinguish what Watson sees, what Helen reports, what Holmes reports from research, and what the player infers.
-- The four proposed evidence IDs are `helen-wrist-marks`, `roylott-threat`, `bent-poker`, and `marriage-income`; see `EVIDENCE_PLAN.md` for provenance and automatic grant triggers.
-- No forced wrong answer, score, permanent failure, culprit verdict, or early solution. Challenge retries are penalty-free.
-- Chapter I history shown on direct entry remains read-only, attributed, and outside Chapter II's found-evidence list.
-- Current Chapter I adaptation does not teach room barriers, a match, a metallic clang, or the eventual mechanism; Chapter II cannot assume these were discovered.
-- Do not treat the original story's prejudiced statements about Roma people as evidence or a learner-facing suspect hypothesis. Teacher content explains the historical bias critically.
-- All learner prose and activities target B1. Media remain optional and text-complete.
+- `docs/chapters/ch02/SCRIPT.md` — complete six-scene adaptation with stable IDs, branch lines, activities, feedback, transitions, and optional direct-entry recap.
+- `docs/chapters/ch02/AUTHOR_READING_COPY.md` — complete reading pass for author review.
+- `docs/chapters/ch02/EDITORIAL_DIFF.md` — concrete redline summary by issue and affected document.
+- `docs/chapters/ch02/SCENE_MAP.md` — beats, gates, IDs, evidence triggers, and Chapter III exit.
+- `docs/chapters/ch02/STATE_AND_BRANCHING.md` — proposed state/recap contract; not implemented.
+- `docs/chapters/ch02/EVIDENCE_PLAN.md` — provenance, epistemic type, acquisition, activities, and standalone availability.
+- `docs/chapters/ch02/TEACHER_CONTENT.md` — per-scene B1 scaffolding and answer visibility boundaries.
+- `docs/chapters/ch02/SOURCE_FIDELITY.md` — Chapter I comparison, source trace, and deliberate omissions.
+- `docs/chapters/ch02/AUDIO_PLAN.md`, `VISUAL_PLAN.md` — future plans only; no media generated.
+- `docs/M03_REVIEW_CHECKPOINT.md`, `docs/M03_CLOSEOUT.md` — current checkpoint and closeout status.
 
-## M03 document set
+## Lock boundary
 
-- `docs/chapters/ch02/SCRIPT.md` — complete adapted dialogue, Watson choices, challenge options, answer feedback, and transitions.
-- `docs/chapters/ch02/SCENE_MAP.md` — six-scene gates and stable IDs.
-- `docs/chapters/ch02/STATE_AND_BRANCHING.md` — proposed persistence, direct entry, branch and dead-end contracts; not implemented.
-- `docs/chapters/ch02/EVIDENCE_PLAN.md` — four evidence records, type, source, grant and dependency rules.
-- `docs/chapters/ch02/AUDIO_PLAN.md` — future logical slots and accessibility; no recordings.
-- `docs/chapters/ch02/VISUAL_PLAN.md` — future scene compositions and alt text; no generated art.
-- `docs/chapters/ch02/TEACHER_CONTENT.md` — non-spoiling scaffolding, post-attempt guidance, historical and safeguarding context.
-- `docs/chapters/ch02/SOURCE_FIDELITY.md` — source trace, intentional omissions and continuity decision.
-- `docs/M03_REVIEW_CHECKPOINT.md` — initial audit, author resolution, and Git/test evidence.
-- `docs/M03_CLOSEOUT.md` — package status, verification, remaining implementation gates, and M04 proposal.
-
-## Approval boundary
-
-Creator approval covers the direction and six scene sequence in the attached user instruction. This package is prepared for final author review and does not lock every dialogue line, media master, runtime architecture, save migration, or publication. No Chapter II runtime, audio, image, commit push, merge, or deployment is authorised by this design document.
+The six-scene structure and Chapter II script are author-approved and locked as recorded in `docs/chapters/ch02/M03_SCRIPT_LOCK.md`. No Chapter II runtime, audio, illustration, push, merge, or deploy has been performed here.

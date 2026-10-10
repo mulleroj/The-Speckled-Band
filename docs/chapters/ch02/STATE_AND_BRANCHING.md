@@ -1,6 +1,6 @@
 # Chapter II — State and branching plan
 
-**Status:** design contract only. M02 runtime currently supports Chapter I only and a single active chapter in save v2. Nothing below is implemented.
+**Status:** design contract for `M03 SCRIPT LOCKED – APPROVED FOR M04`, synchronized 2026-10-10. M02 runtime currently supports Chapter I only and a single active chapter in save v2. Nothing below is implemented.
 
 ## State model
 
@@ -46,8 +46,8 @@ All choices are Watson's words or investigative focus. They can change Holmes/He
 | `ch02.challenge.s01.wrist-observation` | The visible marks answer, Helen's reported explanation, or unsupported murder claim | Keep response and feedback so learner can reconsider. No score or evidence gate. | Retry or S02 |
 | `ch02.s02.hypothesis` | `ch02.s02.choice.cause-known`, `ch02.s02.choice.connect-questions`, `ch02.s02.choice.words-solve` | Store response; feedback labels what is known and unknown. No hypothesis is stored as truth. | S03 |
 | `ch02.s03.response` | `ch02.s03.choice.stay-observing`, `ch02.s03.choice.name-threat` | Store Watson's approach only. Automatic grants follow the narrated threat and poker bend, never the selected reply. | S04 |
-| `ch02.challenge.s04.observation-or-proof` | `ch02.s04.answer.strength-only`, `ch02.s04.answer.guilt`, `ch02.s04.answer.poker-method` | Retry and explanatory feedback. Does not gate the scene indefinitely. | S05 |
-| `ch02.challenge.s05.motive-not-proof` | `ch02.s05.answer.motive-not-proof`, `ch02.s05.answer.will-proves-murder`, `ch02.s05.answer.no-motive` | Unlimited, penalty-free retry. A successful answer marks the activity complete; it does not mark a culprit. | S06 |
+| `ch02.challenge.s04.observation-or-proof` | `ch02.s04.answer.guilt`, `ch02.s04.answer.strength-only`, `ch02.s04.answer.poker-method` | Retry and explanatory feedback. Holmes's ironic response comes only after the attempt. Does not gate the scene indefinitely. | S05 |
+| `ch02.challenge.s05.motive-not-proof` | `ch02.s05.answer.no-motive`, `ch02.s05.answer.will-proves-murder`, `ch02.s05.answer.motive-not-proof` | Unlimited, penalty-free retry. The player gets both marriage facts and figures before the activity; Holmes's proof/motive conclusion comes after the attempt. | S06 |
 | `ch02.s06.next-question` | `what-can-we-see`, `what-remains-unknown`, `what-to-check-first` | Optional display emphasis only. If no choice is saved, use neutral default. | Mark Ch. II complete |
 
 ## Guaranteed evidence and dead-end prevention
@@ -61,8 +61,8 @@ S01, S04, and S05 allow reconsideration. A validation failure rewinds to the saf
 Direct entry at S01 must be self-contained while making no false claim that the player personally found Chapter I clues in this save.
 
 - Chapter I completed: show its validated Case File records as read-only history; preserve the player's original Ch. I save and selected active chapter. S01 still grants only the new wrist observation when it is shown.
-- Classroom direct entry to Chapter II: show a neutral, source-labelled recap panel as optional prior narrative context, not as fabricated evidence. It contains only current Ch. I facts: Helen is at Stoke Moran with stepfather Dr Grimesby Roylott; Julia died two years earlier, shortly before her planned marriage; Julia reportedly heard a low whistle; she reportedly said “the speckled band.” Do not include the source's omitted match, metal clang, room barriers, or other facts not included in the current adaptation.
-- The will activity supplies its own £750/£250 figures. Its inference only needs the relationship and marriage information above; if any relationship is omitted in a later Ch. I revision, supply it here as an attributed report, not as discovered evidence.
+- Classroom direct entry to Chapter II: show a neutral, source-labelled recap panel as optional prior narrative context, not as fabricated evidence. It contains only adapted Chapter I facts and Helen's S01 testimony: she lives at Stoke Moran with stepfather Dr Grimesby Roylott; Julia died two years earlier shortly before a planned marriage; Julia reportedly heard a low whistle and said “the speckled band”; Helen fears the same thing may happen to her; Helen plans to marry this spring. Do not include the omitted match, metal clang, room barriers, or other unavailable facts.
+- S01 explicitly supplies both Julia's past wedding plan and Helen's upcoming marriage as Helen's testimony before S05. The S05 prompt repeats those facts and supplies its figures; no Chapter I evidence ID or successful earlier activity is required.
 - Reopening Case File never mutates state. Chapter I observations remain Chapter I records and cannot be silently copied into `ch02.evidenceIds`.
 - Chapter II completion saves its six-scene completion. Chapter III may start only at its own approved entry and receives no future clues from Ch. II.
 

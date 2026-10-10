@@ -6,10 +6,11 @@
 
 | Stable logical ID | Scene / speaker | Planned use | Production / accessibility boundary |
 | --- | --- | --- | --- |
-| `ambience.case01.ch02.baker-street` | S01–S06, low room bed for 221B | One optional, unobtrusive chapter ambience slot; silence is the fallback. | Reuse a separately approved Baker Street ambience if one exists; do not use an unapproved Chapter I file or invent an asset path. Duck or stop under speech. Never hide dialogue. |
+| `ambience.case01.ch02.baker-street` | S01–S05, low room bed for 221B | One optional, unobtrusive room ambience slot; silence is the fallback. | Reuse a separately approved Baker Street ambience if one exists; do not use an unapproved Chapter I file or invent an asset path. Duck or stop under speech. Never hide dialogue. |
 | `sfx.case01.ch02.door-opening` | S03, Roylott arrives | Optional brief door sound. | Must not startle at high volume. Visual/text event conveys the entrance without it. |
 | `sfx.case01.ch02.poker-bend` | S03, poker incident | Optional restrained metal/wood stress sound, not a realistic violent impact. | No sound is required to identify the event; captions/transcript state the action. |
-| `sfx.case01.ch02.cab-departure` | S06 | Optional soft cab/street transition. | Never imply arrival at the country house. Text identifies leaving London. |
+| `sfx.case01.ch02.cab-departure` | S06 | Existing stable logical slot: optional soft cab/street transition toward Waterloo. | The slot does not imply arrival at the country house or substitute for the revised train-departure narration. All travel and departure remain clear in text. No train audio is required. |
+| `narration.case01.ch02.watson` | Watson's first-person scene narration, S01–S06 | Optional separate narrator track if narration is approved. | Logical slot only; no recording or voice master exists. Keep every narrated word readable; narrator playback cannot be a clue gate. |
 
 ## Speech mapping
 
