@@ -1,8 +1,9 @@
 import { caseManifest } from '../content/case.js';
 import { evidenceRegistry, deduction } from '../content/evidence.js';
 import { chapterOne } from '../content/ch01.js';
-import { freshState, loadGame, persistGame, acquireEvidence, validateState, startChapter, transitionToScene, canEnterScene } from '../engine/state.js';
+import { freshState, loadGame, persistGame, saveEnvelope, acquireEvidence, validateState, startChapter, transitionToScene, canEnterScene } from '../engine/state.js';
 import { renderTeacherNote } from '../teacher/teacher-mode.js';
+import { renderEvidenceBoard, setupCaseFileTabs } from './evidence-board.js';
 
 export function mountChapterOne() {
 const sceneIds = caseManifest.sceneIds;
@@ -12,6 +13,7 @@ const fromEngine = saved => ({ ...saved, scene: Math.max(0, sceneIds.indexOf(sav
 let state;
 try { state = fromEngine(loadGame(window.localStorage)); } catch { state = { scene: 0, ...freshState() }; }
   const el = id => document.getElementById(id);
+  const caseTabs = setupCaseFileTabs();
   function save(){try{persistGame(window.localStorage,toEngine(state));}catch{}}
   function addEvidence(key,revealTrigger){state=fromEngine(acquireEvidence(toEngine(state),key,revealTrigger));}
   function changeScene(next){const moved=transitionToScene(toEngine(state),sceneIds[next]);if(moved.sceneId===state.sceneId)return;state=fromEngine(moved);save();render();window.scrollTo({top:0,behavior:'instant'});el('panelTitle').focus();}
@@ -87,6 +89,7 @@ try { state = fromEngine(loadGame(window.localStorage)); } catch { state = { sce
       const emph=document.createElement('div');emph.className='end-clue';emph.textContent='CASE OPENED  ·  THE INVESTIGATION CONTINUES';el('storyCopy').append(emph);
       instruction(`${state.clues.length} observations collected. Your next destination: Stoke Moran.`);
       action('Review Watson’s Case File',()=>openCase());
+      if(caseManifest.chapters.find(chapter=>chapter.id==='ch02')?.status==='ready')el('primaryAction').append(button('Continue to Chapter II →',()=>{window.location.search='chapter=ch02';},{className:'action ghost'}));
       el('primaryAction').append(button('Play Chapter I again',restartChapter,{className:'action ghost'}));
     }
     el('teacherNote').hidden=!state.teacher;
@@ -95,9 +98,9 @@ try { state = fromEngine(loadGame(window.localStorage)); } catch { state = { sce
     const list=el('evidenceList');list.replaceChildren();
     if(state.clues.length===0){const n=document.createElement('p');n.className='empty';n.textContent='No observations yet. Start the case and look carefully.';list.append(n);}
     else {state.clues.forEach(k=>{if(!evidenceRegistry[k])return;const d=document.createElement('div');d.className='evidence-item';const h=document.createElement('b');h.textContent=evidenceRegistry[k].title;d.append(h,p(evidenceRegistry[k].description));list.append(d);});}
-    el('caseDialog').showModal();
+    renderEvidenceBoard(el('evidenceBoard'),toEngine(state));caseTabs.activate(0);el('caseDialog').showModal();
   }
-  function restartChapter(){if(window.confirm('Restart Chapter I? Your collected observations will be cleared.')){const previousTeacher=state.teacher;state=fromEngine(startChapter('ch01'));state.teacher=previousTeacher;save();render();el('panelTitle').focus();}}
+  function restartChapter(){if(window.confirm('Restart Chapter I? Your collected observations will be cleared.')){const previousTeacher=state.teacher;const histories=saveEnvelope(toEngine(state)).chapters;delete histories.ch01;state=fromEngine(startChapter('ch01',histories));state.teacher=previousTeacher;save();render();el('panelTitle').focus();}}
   el('teacherToggle').addEventListener('click',()=>{state.teacher=!state.teacher;save();render();});
   el('chapterBtn').addEventListener('click',()=>{
     const list=el('chapterList');list.replaceChildren();
@@ -105,7 +108,7 @@ try { state = fromEngine(loadGame(window.localStorage)); } catch { state = { sce
       const item=document.createElement('li');const control=document.createElement('button');control.type='button';control.className='choice';
       control.textContent=`Chapter ${chapter.order} · ${chapter.title}${chapter.status==='planned'?' — In preparation':''}`;
       control.disabled=chapter.status!=='ready';
-      if(chapter.status==='ready')control.addEventListener('click',()=>{if(chapter.id===state.chapterId){el('chapterDialog').close();return;}const next=startChapter(chapter.id);if(next){state=fromEngine(next);save();render();el('chapterDialog').close();}});
+      if(chapter.status==='ready')control.addEventListener('click',()=>{el('chapterDialog').close();if(chapter.id!==state.chapterId)window.location.search=`chapter=${chapter.id}`;});
       item.append(control);list.append(item);
     });
     el('chapterDialog').showModal();

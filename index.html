@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0d1b1d" />
   <meta name="description" content="A playable B1 English-language opening to Sherlock Holmes: The Speckled Band, a classroom-friendly detective adventure." />
-  <title>Sherlock Holmes — The Speckled Band | Chapter I</title>
+  <title>Sherlock Holmes — The Speckled Band | The Baker Street Cases</title>
   <style>
     :root { --ink:#101c1d;--deep:#0a1416;--panel:#172528;--paper:#eadfbe;--gold:#d7ae6b;--muted:#a5b0a7;--line:#40514d;--white:#f7f2e4;--red:#b97868;--storysize:1.06rem }
     * {box-sizing:border-box}
@@ -80,6 +80,20 @@
     .evidence-item {border:1px solid #516050;padding:13px 15px;margin:12px 0;background:#20302c}
     .evidence-item b {color:#e5bf84}
     .evidence-item p {margin:6px 0 0;color:#d6dcd2;font-size:.94rem}
+    .case-tabs {display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #516050;margin:0 0 16px;padding-bottom:9px}
+    .case-tab {min-height:44px;padding:9px 12px;border:1px solid #516050;border-radius:3px;background:#1b2b29;color:#e9dfc7;font: .82rem Arial,sans-serif}
+    .case-tab[aria-selected="true"] {border-color:#d7ae6b;background:#30433a;color:#fff2d4;box-shadow:inset 0 -2px #d7ae6b}
+    .case-tab:focus-visible {outline:3px solid #f7d18c;outline-offset:3px}
+    .case-panel[hidden] {display:none}
+    .board-intro,.board-empty {color:#c0cec3;font:.88rem Arial,sans-serif;line-height:1.55}
+    .board-section {margin:18px 0 22px}
+    .board-section h3 {margin:0 0 8px;color:#f0d8a3;font-weight:normal;font-size:1.12rem;border-bottom:1px solid #46564c;padding-bottom:5px}
+    .board-card-heading {display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .evidence-type {display:inline-block;flex:0 0 auto;border:1px solid #89977e;border-radius:12px;padding:2px 8px;color:#e2d2a9;font: .68rem Arial,sans-serif;line-height:1.5}
+    .hypothesis-type {border-color:#c39a59;color:#ffda9a}
+    .board-origin {font: .78rem Arial,sans-serif!important;color:#c0cec3!important}
+    .board-hypothesis {background:#292d28;border-color:#8c7751}
+    @media(max-width:520px){.case-tabs{gap:6px}.case-tab{padding:8px 5px;font-size:.74rem}.board-card-heading{display:block}.board-card-heading .evidence-type{margin-top:7px}}
     .empty {font-style:italic;color:#b5bfb2}
     .print-only {display:none}
     footer {padding:12px clamp(18px,3vw,45px);font:.7rem Arial,sans-serif;letter-spacing:.02em;background:#0c1617;color:#95a398;border-top:1px solid #2e403c;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -145,142 +159,10 @@
     <div class="footnote" id="panelFootnote">Adapted for B1 learners · Based on the 1892 story by Arthur Conan Doyle</div>
   </section>
 </main>
-<footer><span>SHERLOCK HOLMES · THE SPECKLED BAND — CHAPTER I PROTOTYPE</span><span>Story adapted for learning · No AI or external runtime required</span></footer>
+<footer><span>THE BAKER STREET CASES · THE SPECKLED BAND</span><span>Story adapted for learning · No AI or external runtime required</span></footer>
 </div>
-<dialog id="caseDialog" aria-label="Watson's case file"><div class="dialog-head"><div><span class="overline">Private notes</span><h2>Dr Watson’s Case File</h2></div><button class="mini-btn" type="button" id="closeDialog">Close ×</button></div><p class="instruction">Observations are facts you have noticed. An inference is a conclusion that the evidence can support.</p><div id="evidenceList"></div><div class="footnote">Remember: an unusual detail is not proof of a crime. Do not confuse assumptions with evidence.</div></dialog>
+<dialog id="caseDialog" aria-labelledby="caseDialogTitle"><div class="dialog-head"><div><span class="overline">Private notes</span><h2 id="caseDialogTitle">Dr Watson’s Case File</h2></div><button class="mini-btn" type="button" id="closeDialog">Close ×</button></div><div class="case-tabs" role="tablist" aria-label="Case records"><button class="case-tab" type="button" id="caseTabJournal" role="tab" aria-selected="true" aria-controls="caseJournalPanel" tabindex="0">Case File</button><button class="case-tab" type="button" id="caseTabBoard" role="tab" aria-selected="false" aria-controls="caseBoardPanel" tabindex="-1">Evidence Board</button></div><section class="case-panel" id="caseJournalPanel" role="tabpanel" aria-labelledby="caseTabJournal" tabindex="0"><p class="instruction">Watson’s chronological record of what the investigation has revealed.</p><div id="evidenceList"></div><div class="footnote">Keep observations, reports, and possible explanations distinct.</div></section><section class="case-panel" id="caseBoardPanel" role="tabpanel" aria-labelledby="caseTabBoard" tabindex="0" hidden><div id="evidenceBoard"></div></section></dialog>
 <dialog id="chapterDialog" aria-labelledby="chapterDialogTitle"><div class="dialog-head"><div><span class="overline">The Baker Street Cases</span><h2 id="chapterDialogTitle">Choose a chapter</h2></div><button class="mini-btn" type="button" id="closeChapterDialog">Close ×</button></div><ol id="chapterList"></ol></dialog>
 <script type="module" src="./src/main.js"></script>
-  'use strict';
-  const storageKey = 'sherlock-speckled-band-ch01-v1';
-  const evidenceCatalog = {
-    ticket: ['A return train ticket', 'A ticket stub is partly visible in the visitor’s left glove. It supports travel by train.'],
-    mud: ['Fresh mud on a sleeve', 'Several fresh mud marks cover her left sleeve. She may have travelled along a muddy road.'],
-    fear: ['A frightened visitor', 'She is trembling. She says she is afraid, rather than cold.'],
-    family: ['Stoke Moran', 'Helen and her sister Julia lived in their stepfather’s old country house.'],
-    sister: ['Julia’s unexplained death', 'Julia died two years earlier, shortly before her wedding. The cause was not established.'],
-    whistle: ['A low whistle at night', 'Julia reported hearing a quiet whistle before the tragedy. Its source is unknown.'],
-    lastwords: ['Julia’s final words', 'Julia mentioned “the speckled band” before she died. The meaning is unknown.']
-  };
-  const fresh = () => ({scene:0,teacher:false,approach:'',clues:[],interviews:[],answer:null,feedback:''});
-  const validClues = new Set(Object.keys(evidenceCatalog));
-  const validInterviews = new Set(['family','sister','whistle']);
-  const unique = arr => [...new Set(arr)];
-  function restore(saved){
-    if(!saved||!Number.isInteger(saved.scene)||saved.scene<0||saved.scene>5||!Array.isArray(saved.clues)||!Array.isArray(saved.interviews))return fresh();
-    const restored={...fresh(),...saved};
-    restored.teacher=saved.teacher===true;
-    restored.approach=['questions','ready'].includes(saved.approach)?saved.approach:'';
-    restored.clues=unique(saved.clues.filter(key=>validClues.has(key)));
-    restored.interviews=unique(saved.interviews.filter(key=>validInterviews.has(key)));
-    if(restored.scene>=3&&(!restored.clues.includes('ticket')||!restored.clues.includes('mud')))restored.scene=2;
-    if(restored.scene>=4&&restored.answer!=='correct')restored.scene=3;
-    if(restored.scene>=5&&restored.interviews.length<3)restored.scene=4;
-    if(restored.scene<3)restored.answer=null;
-    if(restored.scene<4)restored.interviews=[];
-    if(restored.scene<5)restored.clues=restored.clues.filter(key=>key!=='lastwords');
-    return restored;
-  }
-  let state = fresh();
-  try {state=restore(JSON.parse(localStorage.getItem(storageKey)||'null'));} catch (_) { /* storage is optional */ }
-  const el = id => document.getElementById(id);
-  function save(){try{localStorage.setItem(storageKey,JSON.stringify(state));}catch(_){}}
-  function addEvidence(key){if(evidenceCatalog[key])state.clues=unique([...state.clues,key]);}
-  function changeScene(next){state.scene=next;state.feedback='';save();render();window.scrollTo({top:0,behavior:'instant'});el('panelTitle').focus();}
-  function setHeader(eyebrow,title,subtitle,overline,panelTitle,clock='London · Early April'){
-    el('stageEyebrow').textContent=eyebrow;el('stageTitle').textContent=title;el('stageSubtitle').textContent=subtitle;
-    el('panelOverline').textContent=overline;el('panelTitle').textContent=panelTitle;el('stageClock').textContent=clock;
-    el('stageIndex').textContent=state.scene===0?'The Baker Street Cases · No. 01':`Chapter I · Scene ${Math.min(state.scene,5)}/5`;
-  }
-  function p(text){const node=document.createElement('p');node.textContent=text;return node;}
-  function line(speaker,text){const node=document.createElement('div');node.className='dialogue';const name=document.createElement('b');name.textContent=speaker;node.append(name,document.createTextNode(text));return node;}
-  function copy(...parts){el('storyCopy').replaceChildren(...parts);}
-  function button(text,cb,options={}){
-    const b=document.createElement('button');b.type='button';b.className=options.className||'choice';if(options.disabled)b.disabled=true;
-    if(options.done)b.classList.add('observed');
-    if(options.number){const n=document.createElement('span');n.className='n';n.textContent=options.done?'✓':options.number;const label=document.createElement('span');label.textContent=text;b.append(n,label);}else b.textContent=text;
-    b.addEventListener('click',cb);return b;
-  }
-  function choices(...items){el('choices').replaceChildren(...items);}
-  function action(text,cb,disabled=false){el('primaryAction').replaceChildren(button(text,cb,{className:'action',disabled}));}
-  function instruction(text){el('instruction').textContent=text;}
-  function teacher(text){el('teacherNote').replaceChildren();if(text){const b=document.createElement('b');b.textContent='TEACHER MODE · ';el('teacherNote').append(b,document.createTextNode(text));}el('teacherNote').hidden=!state.teacher||!text;}
-  function feedback(text,good=false){const node=el('feedback');node.hidden=!text;node.className=good?'feedback good':'feedback';node.textContent=text||'';}
-  const jump=next=>changeScene(next);
-  function render(){
-    el('teacherToggle').setAttribute('aria-pressed',String(state.teacher));el('teacherToggle').textContent=`Teacher Mode: ${state.teacher?'ON':'OFF'}`;
-    el('badge').textContent=String(state.clues.length);el('progress').style.width=`${Math.round((state.scene/5)*100)}%`;
-    el('visualStage').className='scene '+(state.scene===0?'art-cover':state.scene===5?'art-climax':state.scene>=2?'art-client':'art-room');
-    el('choices').replaceChildren();el('primaryAction').replaceChildren();feedback('');teacher('');instruction('');
-    if(state.scene===0){
-      setHeader('A case from the notebook of Dr Watson','The Speckled Band','Every detail matters.','Welcome, detective','An Early Visitor');
-      copy(p('London, early April. A strange visitor has arrived at 221B Baker Street — and with her comes a mystery that begins in a quiet country house.'),p('You are Dr John Watson. Observe carefully, collect facts in your case file, and help Sherlock Holmes decide what they mean.'));
-      teacher('Language level: B1. Target skills: close reading, evidence-based inference, question formation. The opening is an original simplified adaptation, not a verbatim reproduction.');
-      instruction('Approximately 5–8 minutes. Your progress is stored in this browser when available.');
-      action('Open the book →',()=>jump(1));
-    }else if(state.scene===1){
-      setHeader('221B Baker Street','A Sudden Awakening','Some visitors cannot wait until morning.','Scene 01 · A knock at the door','Watson’s Bedroom','7:15 a.m.');
-      copy(p('It was a cold April morning. I was still asleep when Sherlock Holmes entered my bedroom. He was already dressed.'),line('HOLMES','Wake up, Watson. We have a visitor. A young woman came to see me before sunrise.'),p('Holmes rarely rose early. Something about this visit must be important.'));
-      teacher('Original-story anchor: Holmes wakes Watson early because Mrs Hudson has called him to meet a distressed visitor. Introduce the meaning of “visitor”, “rarely”, and “before sunrise”.');
-      instruction('Choose how Watson responds. The choice changes his first observation, not the solution to the mystery.');
-      choices(button('“Who is she, Holmes? What has happened?”',()=>{state.approach='questions';jump(2);},{number:'A'}),button('“Give me a moment. I will come with you.”',()=>{state.approach='ready';jump(2);},{number:'B'}));
-    }else if(state.scene===2){
-      setHeader('The Sitting Room','The Veiled Visitor','Before you ask a question, look closely.','Scene 02 · First impressions','A Woman in Black','A few minutes later');
-      copy(p('A fire was burning in the sitting room. A young woman dressed in black sat by the window. A dark veil hid her face.'),line('HOLMES','Please sit near the fire. You look very cold.'),line('VISITOR','It is not the cold, Mr Holmes. I am afraid.'),p(state.approach==='questions'?'Her voice confirms that something has frightened her. You listen carefully.':'You stand beside Holmes and take a careful look at the stranger.'));
-      teacher('Observation task. Train ticket + fresh mud allow a plausible travel inference; trembling alone does NOT establish a cause. Students should distinguish observable evidence from claims.');
-      instruction('Inspect at least two details. The case file icon in the header stores your observations.');
-      const observe=(key,text,num,msg)=>button(text,()=>{addEvidence(key);state.feedback=msg;save();render();el('choices').children[Number(num)-1]?.focus();},{number:num,done:state.clues.includes(key)});
-      choices(observe('ticket','Look at the glove','1','A small piece of a return train ticket is visible. Where might she have travelled from?'),observe('mud','Examine the left sleeve','2','There are several spots of fresh mud. She may have ridden along a muddy road.'),observe('fear','Watch her expression','3','She is shaking. Her own words tell you it is fear, not the cold.'));
-      if(state.feedback)feedback(state.feedback,true);
-      action('Make a deduction →',()=>jump(3),!state.clues.includes('ticket')||!state.clues.includes('mud'));
-    }else if(state.scene===3){
-      setHeader('221B Baker Street','The First Deduction','Do not guess. Follow the evidence.','Scene 03 · Deduction challenge','What Can You Conclude?','The investigation begins');
-      copy(p('Holmes turns towards you. The visitor has not yet explained why she came.'),line('HOLMES','Well, Watson? What do the ticket and the mud tell you?'),p('Choose the conclusion that is best supported by what you observed.'));
-      teacher('Ask learners to match each possible conclusion to the observations. Which details support a journey, and which details cannot tell us why Helen came? Invite them to explain their choice before submitting it.');
-      instruction('Select the best evidence-based deduction.');
-      const opts=[['She came by train and travelled along a muddy road.',true],['She must be hiding a crime.',false],['She walked through London all night.',false],['She is only shivering because the room is cold.',false]];
-      choices(...opts.map(([txt,ok],i)=>button(txt,()=>{state.answer=ok?'correct':`incorrect-${i}`;save();render();(ok?el('primaryAction').querySelector('button'):el('choices').children[i])?.focus();},{number:String.fromCharCode(65+i)})));
-      if(state.answer==='correct'){feedback('Exactly. The ticket and the mud are observations. The route she took is a reasonable inference — not a certainty about her entire story.',true);action('Hear the visitor’s story →',()=>jump(4));}
-      else if(state.answer){feedback('That conclusion goes beyond the evidence. The ticket and mud tell you something about her journey. Try again.');}
-    }else if(state.scene===4){
-      setHeader('The Case Begins','Helen Stoner','Three questions. Three pieces of the puzzle.','Scene 04 · The testimony','A Terrible Family Secret','221B · Sitting room');
-      copy(p('The visitor slowly lifts her veil. She looks exhausted. She tells you that her name is Helen Stoner and that she has come from Stoke Moran.'),line('HELEN STONER','My sister died two years ago. I am afraid the same thing may happen to me.'),p('You and Holmes must understand the story before visiting her home.'));
-      teacher('A simplified conversation structure adds agency without changing the original plot. Encourage learners to form their own follow-up question using past simple before clicking an option.');
-      instruction('Ask all three questions to build the first case file.');
-      const prompts=[
-        ['family','“Tell us about Stoke Moran.”','Helen lives in an old country house with her stepfather, Dr Grimesby Roylott. He is a frightening and angry man.'],
-        ['sister','“What happened to your sister?”','Julia died suddenly two years ago, shortly before she planned to marry. Nobody could explain her death.'],
-        ['whistle','“Did Julia notice anything unusual?”','On several nights Julia heard a low whistle. She did not know where the sound came from.']
-      ];
-      choices(...prompts.map(([key,txt,result],i)=>button(txt,()=>{if(!state.interviews.includes(key))state.interviews.push(key);addEvidence(key);state.feedback=result;save();render();el('choices').children[i]?.focus();},{number:i+1,done:state.interviews.includes(key)})));
-      if(state.feedback)feedback(state.feedback,true);
-      action('Listen to Julia’s last words →',()=>jump(5),state.interviews.length<3);
-    }else {
-      setHeader('The Investigation Opens','The Speckled Band','The answer is still hidden.','Chapter I · Closing scene','The Words She Cannot Forget','The visitor’s final clue');
-      addEvidence('lastwords');save();
-      el('badge').textContent=String(state.clues.length);
-      copy(p('Helen lowers her voice. Her hands are trembling again.'),line('HELEN STONER','Just before my sister died, she spoke of a speckled band. I still do not know what she meant.'),p('Holmes grows silent. An old house. A strange night sound. A death without an explanation.'),line('HOLMES','We must examine the facts at Stoke Moran, Watson. Until then, we must not pretend to know the answer.'),p('The first case file is open. The mystery has only begun.'));
-      teacher('Stop here for predictions. Collect at least two hypotheses, and ask pupils to distinguish evidence from unsupported suspicion. Chapter II will bring the investigation to Stoke Moran.');
-      const emph=document.createElement('div');emph.className='end-clue';emph.textContent='CASE OPENED  ·  THE INVESTIGATION CONTINUES';el('storyCopy').append(emph);
-      instruction(`${state.clues.length} observations collected. Your next destination: Stoke Moran.`);
-      action('Review Watson’s Case File',()=>openCase());
-      el('primaryAction').append(button('Play Chapter I again',restartChapter,{className:'action ghost'}));
-    }
-    el('teacherNote').hidden=!state.teacher;
-  }
-  function openCase(){
-    const list=el('evidenceList');list.replaceChildren();
-    if(state.clues.length===0){const n=document.createElement('p');n.className='empty';n.textContent='No observations yet. Start the case and look carefully.';list.append(n);}
-    else {state.clues.forEach(k=>{if(!evidenceCatalog[k])return;const d=document.createElement('div');d.className='evidence-item';const h=document.createElement('b');h.textContent=evidenceCatalog[k][0];d.append(h,p(evidenceCatalog[k][1]));list.append(d);});}
-    el('caseDialog').showModal();
-  }
-  function restartChapter(){if(window.confirm('Restart Chapter I? Your collected observations will be cleared.')){const previousTeacher=state.teacher;state=fresh();state.teacher=previousTeacher;save();render();el('panelTitle').focus();}}
-  el('teacherToggle').addEventListener('click',()=>{state.teacher=!state.teacher;save();render();});
-  el('caseBtn').addEventListener('click',openCase);
-  el('closeDialog').addEventListener('click',()=>el('caseDialog').close());
-  el('caseDialog').addEventListener('click',e=>{if(e.target===el('caseDialog'))el('caseDialog').close();});
-  el('restartBtn').addEventListener('click',restartChapter);
-  render();
-})();
-</script>
 </body>
 </html>

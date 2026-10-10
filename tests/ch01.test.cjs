@@ -28,6 +28,19 @@ async function openFresh(options = {}) {
   return { context, page };
 }
 
+test('legacy JavaScript is not rendered below the footer on desktop or mobile', async () => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    const { context, page } = await openFresh({ viewport });
+    const visibleText = await page.locator('body').innerText();
+    assert.doesNotMatch(visibleText, /storageKey|evidenceCatalog|function\s+restore\s*\(/);
+    const footerBounds = await page.locator('footer').boundingBox();
+    const bodyBounds = await page.locator('body').boundingBox();
+    assert.ok(footerBounds && bodyBounds);
+    assert.ok(Math.abs(footerBounds.y + footerBounds.height - bodyBounds.height) <= 1, 'footer should end the page');
+    await context.close();
+  }
+});
+
 async function serveLocalApp(context) {
   await context.route('http://m02.test/**', route => {
     const url = new URL(route.request().url());
@@ -94,7 +107,7 @@ test('full chapter path supports retry, three questions in any order, seven uniq
     assert.equal(await page.locator('#badge').textContent(), '7');
     await page.locator('#caseBtn').click();
     assert.equal(await page.getByRole('dialog').getByRole('heading', { name: 'Dr Watson’s Case File' }).count(), 1);
-    assert.equal(await page.locator('.evidence-item').count(), 7);
+    assert.equal(await page.locator('#caseJournalPanel .evidence-item').count(), 7);
     assert.doesNotMatch(await page.locator('#storyCopy').innerText(), /the snake|the killer|the solution/i);
     assert.deepEqual(requests.filter(url => !url.startsWith('http://m02.test/')), []);
   } finally { await context.close(); }
@@ -141,7 +154,7 @@ test('invalid saved state rewinds safely and cannot expose a later clue', async 
   } finally { await context.close(); }
 });
 
-test('M01 saves migrate to v2 stable scene IDs while preserving safe progress and Teacher Mode', async () => {
+test('M01 saves migrate to v3 per-chapter stable IDs while preserving safe progress and Teacher Mode', async () => {
   const context = await browser.newContext();
   await serveLocalApp(context);
   const page = await context.newPage();
@@ -153,18 +166,19 @@ test('M01 saves migrate to v2 stable scene IDs while preserving safe progress an
     assert.equal(await page.locator('#badge').textContent(), '4');
     assert.equal(await page.getByRole('button', { name: /Teacher Mode: ON/ }).getAttribute('aria-pressed'), 'true');
     const migrated = await page.evaluate(() => JSON.parse(localStorage.getItem('baker-street-save:v2:case.speckled-band')));
-    assert.equal(migrated.version, 2);
-    assert.equal(migrated.progress.sceneId, 'ch01.testimony');
+    assert.equal(migrated.version, 3);
+    assert.equal(migrated.chapters.ch01.sceneId, 'ch01.testimony');
     assert.equal(await page.evaluate(() => localStorage.getItem('sherlock-speckled-band-ch01-v1') !== null), true);
   } finally { await context.close(); }
 });
 
-test('chapter menu lists planned chapters as disabled and preserves current chapter', async () => {
+test('chapter menu enables Chapter II and preserves the Chapter I reading state', async () => {
   const { context, page } = await openFresh();
   try {
     await page.getByRole('button', { name: 'Chapters' }).click();
     assert.equal(await page.getByRole('dialog', { name: 'Choose a chapter' }).getByRole('button', { name: /Chapter 1/ }).isDisabled(), false);
-    for (const chapter of ['Chapter 2','Chapter 3','Chapter 4','Chapter 5']) assert.equal(await page.getByRole('dialog').getByRole('button', { name: new RegExp(chapter) }).isDisabled(), true);
+    assert.equal(await page.getByRole('dialog').getByRole('button', { name: /Chapter 2/ }).isDisabled(), false);
+    for (const chapter of ['Chapter 3','Chapter 4','Chapter 5']) assert.equal(await page.getByRole('dialog').getByRole('button', { name: new RegExp(chapter) }).isDisabled(), true);
     await page.getByRole('button', { name: /Chapter 1/ }).click();
     assert.match(await page.locator('#panelTitle').textContent(), /An Early Visitor/);
   } finally { await context.close(); }
@@ -193,11 +207,25 @@ test('core text and control color pairs meet WCAG AA contrast for normal text', 
       };
       return [pair('body'), pair('.brand-txt small'), pair('.choice'), pair('.instruction'), pair('.footnote'), pair('.mini-btn')];
     });
+    await page.getByRole('button', { name: 'Look at the glove' }).click();
+    await page.getByRole('button', { name: /Case File/ }).click();
+    await page.getByRole('tab', { name: 'Evidence Board' }).click();
+    const boardPairs = await page.evaluate(() => {
+      const effectiveBackground = element => {
+        for (let current = element; current; current = current.parentElement) {
+          const color = getComputedStyle(current).backgroundColor;
+          if (color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') return color;
+        }
+        return getComputedStyle(document.body).backgroundColor;
+      };
+      return ['.case-tab[aria-selected="true"]','.case-tab[aria-selected="false"]','.board-intro','.board-section h3','.board-evidence','.board-evidence b','.board-evidence p','.evidence-type']
+        .map(selector => { const element=document.querySelector(selector);const style=getComputedStyle(element);return {selector,foreground:style.color,background:effectiveBackground(element)}; });
+    });
     const luminance = color => {
       const channels = color.match(/[\d.]+/g).slice(0, 3).map(value => Number(value) / 255).map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
       return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
     };
-    for (const item of pairs) {
+    for (const item of [...pairs,...boardPairs]) {
       const values = [luminance(item.foreground), luminance(item.background)].sort((a, b) => b - a);
       const ratio = (values[0] + 0.05) / (values[1] + 0.05);
       assert.ok(ratio >= 4.5, `${item.selector} contrast is ${ratio.toFixed(2)}:1`);

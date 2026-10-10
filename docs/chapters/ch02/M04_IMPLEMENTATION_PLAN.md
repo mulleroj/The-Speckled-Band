@@ -1,6 +1,6 @@
 # M04 — Chapter II implementation plan
 
-**Status:** planning only. No runtime changes are part of M03.2. Implementation begins only after the author locks the Chapter II script.
+**Status:** implemented under the M03 script lock. See `docs/M04_REPORT.md` for changed files, test evidence, and remaining acceptance limits. This plan preserves the M03 scope and sequence.
 
 ## Scope and acceptance
 

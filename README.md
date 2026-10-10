@@ -1,6 +1,6 @@
-# Sherlock Holmes: The Speckled Band — Chapter I
+# Sherlock Holmes: The Speckled Band — The Baker Street Cases
 
-**Status:** M01 Chapter I baseline with automated browser regression; not a finished book or production release.
+**Status:** Chapters I and II are playable. Later chapters, final media, manual assistive-technology review, and production release remain open.
 
 ## Run
 
@@ -12,22 +12,25 @@ You can also deploy the contents of this folder as a static site on Netlify. Do 
 
 ## Playable slice
 
-- Opening title and Watson's early-morning awakening at Baker Street.
+- Chapter selection and independent resume progress for Chapters I and II.
+- Chapter I opening: Watson's early-morning awakening at Baker Street.
 - Two opening responses (limited flavour branching).
 - Three individually collectible first impressions.
 - Evidence-based deduction challenge with feedback and retry.
 - Three dialogue choices to interview Helen Stoner.
-- Cliffhanger with Julia's last words. No solution revealed.
-- Watson's Case File, Teacher Mode, restart, local browser save, responsive layout, reduced-motion support.
+- Chapter I cliffhanger with Julia's last words. No solution revealed.
+- Complete six-scene Chapter II, with all Watson choices and three retryable deduction activities.
+- Automatic, provenance-labelled Chapter II evidence and a read-only Chapter I recap on direct entry.
+- Watson's chronological Case File and a separate Evidence Board tab, Teacher Mode, restart, local browser save, responsive layout, reduced-motion support.
 - All on-screen learner text is English at approximately B1. Teacher notes are English, too.
 
 ## M02 architecture
 
-`src/content/` contains case/chapter copy, scene metadata, deduction definitions, the evidence registry, and logical media slots. `src/engine/` validates progression/evidence and migrates M01 saves to the versioned case save. `src/view/` contains the Chapter I presentation and interactions; `src/teacher/` renders scene-keyed notes without mutating game state. Chapter navigation lists five planned positions, with only Chapter I enabled. Chapters II–V have no scenes or seed evidence yet. The architectural decisions and tradeoffs are in `docs/M02_ARCHITECTURE.md`.
+`src/content/` contains chapter copy, scene metadata, deduction definitions, the evidence registry, and logical media slots. `src/engine/` validates progression/evidence and migrates M01/M02 saves to version 3 with independent chapter histories. `src/view/` contains the Chapter I and II presentations; `src/teacher/` renders scene-keyed notes without mutating game state. Chapter III–V remain disabled. The architectural decisions and tradeoffs are in `docs/M02_ARCHITECTURE.md`; the Chapter II delivery record is `docs/M04_REPORT.md`.
 
 ## Not implemented yet
 
-Approved portraits and illustrations, approved recorded voices, ambience/SFX, more chapters, a Teacher Mode lesson pack, and production deployment. Manual screen-reader/assistive-technology and cross-browser reviews remain open.
+Approved portraits and illustrations, recorded voices, ambience/SFX, Chapters III–V, a Teacher Mode lesson pack, and production deployment. Manual screen-reader/assistive-technology and cross-browser reviews remain open.
 
 ## Design integrity
 
@@ -45,6 +48,6 @@ Visual art currently consists solely of original inlined SVG shapes, not unlicen
 
 ## Working with Codex
 
-For the **Codex-ready handoff**, read `AGENTS.md` and `docs/M01_BRIEF.md`. The first iteration is stabilization and regression protection, *not* further chapter generation or deployment.
+For the project workflow, read `AGENTS.md`, then the milestone-specific brief and report. Do not push, merge, or deploy without an explicit request.
 
 See `docs/M01_AUDIT.md` for the M01 audit, changes, validation scope, known gaps, and M02 proposal.
