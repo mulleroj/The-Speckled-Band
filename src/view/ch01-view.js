@@ -13,7 +13,8 @@ const fromEngine = saved => ({ ...saved, scene: Math.max(0, sceneIds.indexOf(sav
 let state;
 try { state = fromEngine(loadGame(window.localStorage)); } catch { state = { scene: 0, ...freshState() }; }
   const el = id => document.getElementById(id);
-  const awakeningArt = caseManifest.media['art.case01.ch01.awakening'];
+const sceneArt = Object.values(caseManifest.media).filter(item => item.type === 'illustration' && item.sceneId && item.source && !item.source.startsWith('inline:'));
+const wideCompositionScenes = new Set(['ch01.observations', 'ch01.testimony', 'ch01.closing']);
   const caseTabs = setupCaseFileTabs();
   function save(){try{persistGame(window.localStorage,toEngine(state));}catch{}}
   function addEvidence(key,revealTrigger){state=fromEngine(acquireEvidence(toEngine(state),key,revealTrigger));}
@@ -42,14 +43,17 @@ try { state = fromEngine(loadGame(window.localStorage)); } catch { state = { sce
   function render(){
     el('teacherToggle').setAttribute('aria-pressed',String(state.teacher));el('teacherToggle').textContent=`Teacher Mode: ${state.teacher?'ON':'OFF'}`;
     el('badge').textContent=String(state.clues.length);el('progress').style.width=`${Math.round((state.scene/5)*100)}%`;
-    el('visualStage').className='scene '+(state.scene===0?'art-cover':state.scene===5?'art-climax':state.scene>=2?'art-client':'art-room');
-    el('awakeningArt').hidden=state.scene!==1;
-    el('prototypeArt').hidden=state.scene===1;
-    el('awakeningArt').style.display=state.scene===1?'':'none';
-    el('prototypeArt').style.display=state.scene===1?'none':'';
-    el('artCredit').textContent=state.scene===1?'Approved scene illustration · v01':'Original atmospheric artwork · prototype (SVG)';
-    if(state.scene===1)el('awakeningArt').src=awakeningArt.source;
-    else el('awakeningArt').removeAttribute('src');
+    const sceneId=sceneIds[state.scene];
+    const illustration=sceneArt.find(item=>item.sceneId===sceneId);
+    el('visualStage').className='scene '+(state.scene===0?'art-cover':state.scene===5?'art-climax':state.scene>=2?'art-client':'art-room')+(illustration?' art-approved':'')+(wideCompositionScenes.has(sceneId)?' art-wide-stage':'');
+    el('visualStage').querySelector('.stage-art').style.setProperty('--scene-art-bg',illustration?`url("${illustration.source}")`:'none');
+    el('awakeningArt').hidden=!illustration;
+    el('prototypeArt').hidden=Boolean(illustration);
+    el('awakeningArt').style.display=illustration?'':'none';
+    el('prototypeArt').style.display=illustration?'none':'';
+    el('artCredit').textContent=illustration?'Approved scene illustration · v01':'Original atmospheric artwork · prototype (SVG)';
+    if(illustration){el('awakeningArt').src=illustration.source;el('awakeningArt').alt=illustration.alt;}
+    else {el('awakeningArt').removeAttribute('src');el('awakeningArt').alt='';}
     el('choices').replaceChildren();el('primaryAction').replaceChildren();feedback('');teacher('');instruction('');
     if(state.scene===0){
       setHeader('A case from the notebook of Dr Watson','The Speckled Band','Every detail matters.','Welcome, detective','An Early Visitor');

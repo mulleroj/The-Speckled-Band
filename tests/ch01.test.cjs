@@ -56,11 +56,18 @@ test('approved awakening artwork loads within the shared stage on desktop and mo
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     const { context, page } = await openFresh({ viewport });
     const assetPath = '/assets/visual/variants/scenes/baker-street/scene.case01.ch01-s02.sudden-awakening__v01__approved.png';
-    const assetResponse = page.waitForResponse(response => response.url().endsWith(assetPath));
+    const responses=[];
+    page.on('response',response=>responses.push(response));
     try {
-      assert.equal(await page.locator('#prototypeArt').isVisible(), true, 'the original title artwork remains on the entry scene');
+      assert.equal(await page.locator('#prototypeArt').isVisible(), false, 'the approved entry scene replaces the prototype artwork');
+      await page.locator('#awakeningArt').evaluate(image=>image.decode());
+      const entryResponse = await page.evaluate(async()=>{const response=await fetch('/assets/visual/variants/scenes/baker-street/scene.case01.ch01-entry.room-that-waits__v01__approved.png');return {status:response.status,type:response.headers.get('content-type')};});
+      assert.equal(entryResponse.status,200);
+      assert.match(entryResponse.type,/image\/png/);
       await page.getByRole('button', { name: 'Open the book' }).click();
-      const response = await assetResponse;
+      await page.locator('#awakeningArt').evaluate(image=>image.decode());
+      const response = responses.find(response=>response.url().endsWith(assetPath));
+      assert.ok(response);
       assert.equal(response.status(), 200);
       assert.equal(response.headers()['content-type'], 'image/png');
       const visual = await page.locator('#awakeningArt').evaluate(image => ({
@@ -87,11 +94,115 @@ test('approved awakening artwork loads within the shared stage on desktop and mo
       assert.equal(await page.locator('#panelTitle').textContent(), 'Watson’s Bedroom', 'the saved scene restores after reload');
       assert.equal(await page.getByRole('button', { name: /Teacher Mode: ON/ }).getAttribute('aria-pressed'), 'true');
       await page.getByRole('button', { name: /Who is she, Holmes/ }).click();
-      assert.equal(await page.locator('#awakeningArt').isVisible(), false, 'the pilot artwork is hidden after scene navigation');
-      assert.equal(await page.locator('#prototypeArt').isVisible(), true, 'the original stage artwork returns on other scenes');
-      assert.equal(await page.locator('#artCredit').textContent(), 'Original atmospheric artwork · prototype (SVG)');
+      assert.ok((await page.locator('#awakeningArt').getAttribute('src')).endsWith('scene.case01.ch01-s03.first-observations__v01__approved.png'), 'scene navigation selects the observations illustration');
+      assert.equal(await page.locator('#prototypeArt').isVisible(), false, 'the next approved illustration appears after scene navigation');
+      assert.equal(await page.locator('#artCredit').textContent(), 'Approved scene illustration · v01');
     } finally { await context.close(); }
   }
+});
+
+test('all six Chapter I scene illustrations map to their runtime IDs and load over the browser fixture', async () => {
+  const sceneAssets = [
+    ['ch01.entry','scene.case01.ch01-entry.room-that-waits__v01__approved.png'],
+    ['ch01.awakening','scene.case01.ch01-s02.sudden-awakening__v01__approved.png'],
+    ['ch01.observations','scene.case01.ch01-s03.first-observations__v01__approved.png'],
+    ['ch01.deduction','scene.case01.ch01-deduction.first-deduction__v01__approved.png'],
+    ['ch01.testimony','scene.case01.ch01-testimony.helen-lifts-veil__v01__approved.png'],
+    ['ch01.closing','scene.case01.ch01-closing.silent-reaction__v01__approved.png']
+  ];
+  for(const viewport of [{width:1440,height:900},{width:1920,height:1080},{width:1024,height:768},{width:390,height:844}]){
+    const {context,page}=await openFresh({viewport});
+    const inspected=[];const responses=[];page.on('response',response=>responses.push(response));
+    const inspect=async (sceneId,file)=>{
+      await page.locator('#awakeningArt').evaluate(image=>image.decode());
+      inspected.push(await page.locator('#awakeningArt').evaluate((image,expected)=>{const box=element=>{const r=element.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};return {sceneId:expected.sceneId,src:image.getAttribute('src'),alt:image.alt,loaded:image.complete&&image.naturalWidth===1536&&image.naturalHeight===1024,position:getComputedStyle(image).objectPosition,fit:getComputedStyle(image).objectFit,mask:getComputedStyle(image).maskImage,imageBox:box(image),stageBox:box(document.querySelector('#visualStage')),titleBox:box(document.querySelector('#stageTitle'))};},{sceneId}));
+      const response=responses.find(item=>item.url().endsWith(file));
+      if(!response){const result=await page.evaluate(async asset=>{const item=await fetch(`/assets/visual/variants/scenes/baker-street/${asset}`);return {status:item.status,type:item.headers.get('content-type')};},file);assert.equal(result.status,200,`${sceneId} asset response`);assert.match(result.type,/image\/png/);}
+      else {assert.equal(response.status(),200,`${sceneId} asset response`);assert.match(response.headers()['content-type'],/image\/png/);}
+      const dimensions=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+      assert.equal(dimensions.scroll,dimensions.client,`${sceneId} has no horizontal overflow at ${viewport.width}px`);
+    };
+    try {
+      await inspect(...sceneAssets[0]);
+      await page.getByRole('button',{name:'Open the book'}).click(); await inspect(...sceneAssets[1]);
+      await page.getByRole('button',{name:/Who is she, Holmes/}).click(); await inspect(...sceneAssets[2]);
+      await page.getByRole('button',{name:'Look at the glove'}).click(); await page.getByRole('button',{name:'Examine the left sleeve'}).click();
+      await page.getByRole('button',{name:'Make a deduction'}).click(); await inspect(...sceneAssets[3]);
+      await page.getByRole('button',{name:'She came by train and travelled along a muddy road.'}).click();
+      await page.getByRole('button',{name:/Hear the visitor’s story/}).click(); await inspect(...sceneAssets[4]);
+      await page.getByRole('button',{name:/Did Julia notice anything unusual/}).click(); await page.getByRole('button',{name:/Tell us about Stoke Moran/}).click();
+      await page.getByRole('button',{name:/What happened to your sister/}).click(); await page.getByRole('button',{name:/Listen to Julia’s last words/}).click(); await inspect(...sceneAssets[5]);
+      assert.equal(inspected.length,6);
+      for(let i=0;i<sceneAssets.length;i++){
+        assert.equal(inspected[i].sceneId,sceneAssets[i][0]);
+        assert.ok(inspected[i].src.endsWith(sceneAssets[i][1]));
+        assert.equal(inspected[i].loaded,true);
+        assert.equal(inspected[i].fit,'cover');
+        if(viewport.width>930){
+          const item=inspected[i];
+          assert.ok(Math.abs(item.stageBox.width/item.stageBox.height-1.5)<0.01,`${item.sceneId} uses a 3:2 desktop stage`);
+          assert.ok(Math.abs(item.imageBox.width-item.stageBox.width)<1,`${item.sceneId} art spans the desktop stage width`);
+          assert.ok(Math.abs(item.imageBox.height-item.stageBox.height)<1,`${item.sceneId} art fills the desktop stage height`);
+          assert.ok(item.titleBox.top<item.imageBox.bottom&&item.titleBox.bottom>item.imageBox.top,`${item.sceneId} title overlays the illustration`);
+          assert.equal(item.mask,'none',`${item.sceneId} has no experimental image-edge mask`);
+        }
+      }
+      assert.equal(await page.locator('#prototypeArt').isVisible(),false);
+    } finally {await context.close();}
+  }
+});
+
+test('desktop sticky stage keeps its place beside long reading panels without changing document overflow', async () => {
+  for (const viewport of [{width:1440,height:900},{width:1024,height:768}]) {
+    for (const target of ['observations','testimony']) {
+      const {context,page}=await openFresh({viewport});
+      try {
+        await page.getByRole('button',{name:'Open the book'}).click();
+        await page.getByRole('button',{name:/Who is she, Holmes/}).click();
+        if(target==='testimony'){
+          await page.getByRole('button',{name:'Look at the glove'}).click();
+          await page.getByRole('button',{name:'Examine the left sleeve'}).click();
+          await page.getByRole('button',{name:'Make a deduction'}).click();
+          await page.getByRole('button',{name:'She came by train and travelled along a muddy road.'}).click();
+          await page.getByRole('button',{name:/Hear the visitor’s story/}).click();
+        }
+        const stage=page.locator('#visualStage'),story=page.locator('#storyPanel');
+        assert.equal(await stage.evaluate(node=>getComputedStyle(node).position),'sticky');
+        const before=await page.evaluate(()=>({height:document.documentElement.scrollHeight,width:document.documentElement.scrollWidth}));
+        await page.evaluate(()=>scrollTo(0,Math.min(260,document.documentElement.scrollHeight-innerHeight)));
+        const result=await page.evaluate(()=>{const s=document.querySelector('#visualStage').getBoundingClientRect(),p=document.querySelector('#storyPanel').getBoundingClientRect();return {scrollY,scrollHeight:document.documentElement.scrollHeight,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,stage:{top:s.top,bottom:s.bottom,right:s.right,height:s.height},story:{top:p.top,left:p.left}};});
+        assert.ok(result.scrollY>0,`${target} can scroll vertically`);
+        assert.ok(Math.abs(result.stage.top-12)<1,`${target} stage sticks below the viewport edge`);
+        assert.ok(result.stage.bottom<=viewport.height,`${target} stage fits within the viewport`);
+        assert.ok(result.stage.right<=result.story.left,`${target} stage does not overlap the reading panel`);
+        assert.equal(result.scrollWidth,result.clientWidth,`${target} has no horizontal overflow`);
+        assert.equal(result.scrollHeight,before.height,`${target} sticky positioning adds no document height`);
+        await stage.evaluate(node=>node.style.position='static');
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollHeight),before.height,`${target} document height matches the non-sticky layout`);
+      } finally {await context.close();}
+    }
+  }
+});
+
+test('mobile keeps the approved non-sticky scene layout', async () => {
+  const {context,page}=await openFresh({viewport:{width:390,height:844}});
+  try {
+    await page.getByRole('button',{name:'Open the book'}).click();
+    await page.getByRole('button',{name:/Who is she, Holmes/}).click();
+    const layout=await page.evaluate(()=>({position:getComputedStyle(document.querySelector('#visualStage')).position,stageWidth:document.querySelector('#visualStage').getBoundingClientRect().width,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth}));
+    assert.notEqual(layout.position,'sticky');
+    assert.ok(layout.stageWidth<=390);
+    assert.equal(layout.scrollWidth,layout.clientWidth);
+  } finally {await context.close();}
+});
+
+test('sticky stage is disabled when the desktop viewport is shorter than the panel', async () => {
+  const {context,page}=await openFresh({viewport:{width:1440,height:500}});
+  try {
+    const layout=await page.evaluate(()=>({position:getComputedStyle(document.querySelector('#visualStage')).position,stageHeight:document.querySelector('#visualStage').getBoundingClientRect().height,viewportHeight:innerHeight}));
+    assert.equal(layout.position,'relative');
+    assert.ok(layout.stageHeight>layout.viewportHeight,'the 3:2 panel is taller than this short viewport');
+  } finally {await context.close();}
 });
 
 async function reachObservations(page, reply) {
