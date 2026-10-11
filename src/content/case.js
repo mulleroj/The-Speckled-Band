@@ -11,6 +11,7 @@ export const caseManifest = Object.freeze({
   sceneIds: ['ch01.entry', 'ch01.awakening', 'ch01.observations', 'ch01.deduction', 'ch01.testimony', 'ch01.closing', 'ch02.s01.hidden-bruises','ch02.s02.difficult-puzzle','ch02.s03.unwelcome-visitor','ch02.s04.bent-poker','ch02.s05.price-of-marriage','ch02.s06.journey-begins'],
   media: {
     'art.case01.ch01.baker-street-dawn': { type: 'illustration', source: 'inline:stage-art', alt: 'Atmospheric view of Victorian London at dawn' },
+    'art.case01.ch01.awakening': { type: 'illustration', sceneId: 'ch01.awakening', source: 'assets/visual/variants/scenes/baker-street/scene.case01.ch01-s02.sudden-awakening__v01__approved.png', alt: 'Sherlock Holmes wakes Dr Watson in his bedroom at 221B Baker Street.' },
     'voice.case01.ch01.holmes.wake-watson': { type: 'voice', source: null, transcriptId: 'ch01.awakening.holmes.01' },
     'ambience.case01.ch01.sitting-room': { type: 'ambience', source: null },
     'sfx.case01.ch01.door-knock': { type: 'sfx', source: null },

@@ -47,10 +47,52 @@ async function serveLocalApp(context) {
     if (url.pathname === '/' || url.pathname === '/index.html') return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html });
     const file = path.resolve(root, `.${decodeURIComponent(url.pathname)}`);
     if (!file.startsWith(root + path.sep) || !fs.existsSync(file)) return route.fulfill({ status: 404, body: 'Not found' });
-    const contentType = file.endsWith('.js') ? 'text/javascript; charset=utf-8' : 'application/octet-stream';
+    const contentType = file.endsWith('.js') ? 'text/javascript; charset=utf-8' : file.endsWith('.png') ? 'image/png' : 'application/octet-stream';
     return route.fulfill({ status: 200, contentType, body: fs.readFileSync(file) });
   });
 }
+
+test('approved awakening artwork loads within the shared stage on desktop and mobile', async () => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    const { context, page } = await openFresh({ viewport });
+    const assetPath = '/assets/visual/variants/scenes/baker-street/scene.case01.ch01-s02.sudden-awakening__v01__approved.png';
+    const assetResponse = page.waitForResponse(response => response.url().endsWith(assetPath));
+    try {
+      assert.equal(await page.locator('#prototypeArt').isVisible(), true, 'the original title artwork remains on the entry scene');
+      await page.getByRole('button', { name: 'Open the book' }).click();
+      const response = await assetResponse;
+      assert.equal(response.status(), 200);
+      assert.equal(response.headers()['content-type'], 'image/png');
+      const visual = await page.locator('#awakeningArt').evaluate(image => ({
+        visible: !image.hidden, loaded: image.complete && image.naturalWidth === 1536 && image.naturalHeight === 1024,
+        fit: getComputedStyle(image).objectFit, position: getComputedStyle(image).objectPosition,
+        stage: (() => { const rect = document.querySelector('#visualStage').getBoundingClientRect(); return { width: rect.width, height: rect.height }; })()
+      }));
+      assert.equal(visual.visible, true);
+      assert.equal(visual.loaded, true);
+      assert.equal(visual.fit, 'cover');
+      assert.deepEqual(await page.locator('#prototypeArt').evaluate(node => ({ hidden:node.hidden, display:getComputedStyle(node).display })), { hidden:true, display:'none' });
+      assert.equal(await page.locator('#panelTitle').textContent(), 'Watson’s Bedroom');
+      assert.equal(await page.locator('#artCredit').textContent(), 'Approved scene illustration · v01');
+      assert.ok(visual.stage.width > 0 && visual.stage.height > 0);
+      if (viewport.width === 390) assert.ok(visual.stage.width < 520, 'mobile stage uses the compact scene layout');
+      await page.getByRole('button', { name: /Teacher Mode: OFF/ }).click();
+      assert.equal(await page.locator('#teacherNote').isVisible(), true);
+      await page.getByRole('button', { name: /Case File/ }).click();
+      await page.getByRole('tab', { name: 'Evidence Board' }).click();
+      assert.equal(await page.getByRole('tab', { name: 'Evidence Board' }).getAttribute('aria-selected'), 'true');
+      await page.getByRole('button', { name: 'Close ×' }).click();
+      await page.reload();
+      await page.locator('#awakeningArt').evaluate(image => image.decode());
+      assert.equal(await page.locator('#panelTitle').textContent(), 'Watson’s Bedroom', 'the saved scene restores after reload');
+      assert.equal(await page.getByRole('button', { name: /Teacher Mode: ON/ }).getAttribute('aria-pressed'), 'true');
+      await page.getByRole('button', { name: /Who is she, Holmes/ }).click();
+      assert.equal(await page.locator('#awakeningArt').isVisible(), false, 'the pilot artwork is hidden after scene navigation');
+      assert.equal(await page.locator('#prototypeArt').isVisible(), true, 'the original stage artwork returns on other scenes');
+      assert.equal(await page.locator('#artCredit').textContent(), 'Original atmospheric artwork · prototype (SVG)');
+    } finally { await context.close(); }
+  }
+});
 
 async function reachObservations(page, reply) {
   await page.getByRole('button', { name: 'Open the book' }).click();
