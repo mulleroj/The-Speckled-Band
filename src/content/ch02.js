@@ -4,6 +4,14 @@ export const chapterTwo=Object.freeze({
   scenes:Object.freeze({
     [ids[0]]:scene(ids[0],'The Hidden Bruises',ids[1]),[ids[1]]:scene(ids[1],'A Difficult Puzzle',ids[2]),[ids[2]]:scene(ids[2],'The Unwelcome Visitor',ids[3]),[ids[3]]:scene(ids[3],'The Bent Poker',ids[4]),[ids[4]]:scene(ids[4],'The Price of Marriage',ids[5]),[ids[5]]:scene(ids[5],'The Journey Begins',null,{requiresCorrectAnswer:true,completeChapter:true})
   }),sceneIds:ids,
+  overlayCopy:Object.freeze({
+    [ids[0]]:Object.freeze({eyebrow:'The Man from Stoke Moran',subtitle:'A quiet moment in the Baker Street sitting room.',clock:'221B Baker Street · Morning'}),
+    [ids[1]]:Object.freeze({eyebrow:'The Man from Stoke Moran',subtitle:'Helen has left. The questions remain.',clock:'221B Baker Street · Morning'}),
+    [ids[2]]:Object.freeze({eyebrow:'The Man from Stoke Moran',subtitle:'The door opens without warning.',clock:'221B Baker Street · Morning'}),
+    [ids[3]]:Object.freeze({eyebrow:'The Man from Stoke Moran',subtitle:'Holmes straightens the iron.',clock:'221B Baker Street · Morning'}),
+    [ids[4]]:Object.freeze({eyebrow:'The Man from Stoke Moran',subtitle:'Holmes has returned with the figures.',clock:'221B Baker Street · Near one o’clock'}),
+    [ids[5]]:Object.freeze({eyebrow:'DEPARTURE FROM WATERLOO',subtitle:'The investigation moves beyond London.',clock:'Waterloo → Leatherhead'})
+  }),
   evidenceGrants:{'helen-wrist-marks':'observe-wrist','roylott-threat':'witness-threat','bent-poker':'witness-bend','marriage-income':'hear-calculation'},
   interfaceCopy:{
     prompts:{wrist:'Which note records only what you can see?',puzzle:'Which thought stays closest to the facts we have?',poker:'What does the poker incident support?',motive:'Julia was to marry before she died. Helen plans to marry this spring. What do these figures support?',next:'What will you remember to ask when you reach the house?'},

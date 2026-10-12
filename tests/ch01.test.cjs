@@ -80,7 +80,8 @@ test('approved awakening artwork loads within the shared stage on desktop and mo
       assert.equal(visual.fit, 'cover');
       assert.deepEqual(await page.locator('#prototypeArt').evaluate(node => ({ hidden:node.hidden, display:getComputedStyle(node).display })), { hidden:true, display:'none' });
       assert.equal(await page.locator('#panelTitle').textContent(), 'Watson’s Bedroom');
-      assert.equal(await page.locator('#artCredit').textContent(), 'Approved scene illustration · v01');
+      assert.equal(await page.locator('#artCredit').count(), 0, 'the technical production caption is not rendered');
+      assert.doesNotMatch(await page.locator('body').innerText(), /Approved scene illustration · v01/);
       assert.ok(visual.stage.width > 0 && visual.stage.height > 0);
       if (viewport.width === 390) assert.ok(visual.stage.width < 520, 'mobile stage uses the compact scene layout');
       await page.getByRole('button', { name: /Teacher Mode: OFF/ }).click();
@@ -96,7 +97,8 @@ test('approved awakening artwork loads within the shared stage on desktop and mo
       await page.getByRole('button', { name: /Who is she, Holmes/ }).click();
       assert.ok((await page.locator('#awakeningArt').getAttribute('src')).endsWith('scene.case01.ch01-s03.first-observations__v01__approved.png'), 'scene navigation selects the observations illustration');
       assert.equal(await page.locator('#prototypeArt').isVisible(), false, 'the next approved illustration appears after scene navigation');
-      assert.equal(await page.locator('#artCredit').textContent(), 'Approved scene illustration · v01');
+      assert.equal(await page.locator('#artCredit').count(), 0, 'the technical production caption is not rendered after navigation');
+      assert.doesNotMatch(await page.locator('body').innerText(), /Approved scene illustration · v01/);
     } finally { await context.close(); }
   }
 });
@@ -116,6 +118,8 @@ test('all six Chapter I scene illustrations map to their runtime IDs and load ov
     const inspect=async (sceneId,file)=>{
       await page.locator('#awakeningArt').evaluate(image=>image.decode());
       inspected.push(await page.locator('#awakeningArt').evaluate((image,expected)=>{const box=element=>{const r=element.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};return {sceneId:expected.sceneId,src:image.getAttribute('src'),alt:image.alt,loaded:image.complete&&image.naturalWidth===1536&&image.naturalHeight===1024,position:getComputedStyle(image).objectPosition,fit:getComputedStyle(image).objectFit,mask:getComputedStyle(image).maskImage,imageBox:box(image),stageBox:box(document.querySelector('#visualStage')),titleBox:box(document.querySelector('#stageTitle'))};},{sceneId}));
+      assert.equal(await page.locator('#artCredit').count(),0,`${sceneId} does not render the technical production caption`);
+      assert.doesNotMatch(await page.locator('body').innerText(),/Approved scene illustration · v01/);
       const response=responses.find(item=>item.url().endsWith(file));
       if(!response){const result=await page.evaluate(async asset=>{const item=await fetch(`/assets/visual/variants/scenes/baker-street/${asset}`);return {status:item.status,type:item.headers.get('content-type')};},file);assert.equal(result.status,200,`${sceneId} asset response`);assert.match(result.type,/image\/png/);}
       else {assert.equal(response.status(),200,`${sceneId} asset response`);assert.match(response.headers()['content-type'],/image\/png/);}

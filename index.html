@@ -48,7 +48,6 @@
       #visualStage.art-approved .scene-heading {position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 clamp(25px,5.4vw,78px) clamp(28px,3.5vw,48px);text-shadow:0 3px 16px #000}
       #visualStage.art-approved .scene-heading h1 {font-size:clamp(2.15rem,3.5vw,4rem);line-height:1.02;margin:8px 0 10px;max-width:100%}
       #visualStage.art-approved .scene-heading .subtitle {font-size:clamp(.92rem,1.15vw,1.08rem)}
-      #visualStage.art-approved #artCredit {z-index:3}
     }
     @media(min-width:931px) and (min-height:640px){#visualStage.art-approved {position:sticky;top:12px}}
     .scene-top {display:flex;justify-content:space-between;align-items:start;padding:34px 37px;gap:20px}
@@ -87,7 +86,6 @@
     .teacher p {margin:6px 0 0}
     .teacher[hidden],.feedback[hidden],.fig-credit[hidden] {display:none}
     .find-count {font: .79rem Arial,sans-serif;color:#bfbf9f;margin:0}
-    .art-credit {position:absolute;left:23px;bottom:12px;font:.63rem Arial,sans-serif;color:#c9bd9f;opacity:.6}
     .end-clue {font-size:1.15rem;letter-spacing:.01em;color:#f0d8a3;border-left:3px solid #d0a972;padding:15px 20px;background:#4d382444;margin:20px 0}
     dialog {background:#142021;color:#efe6d0;border:1px solid #a78c5a;width:min(660px,calc(100vw - 28px));max-height:min(84vh,720px);padding:27px;box-shadow:0 15px 80px #000b}
     dialog::backdrop {background:#060e0ee6;backdrop-filter:blur(4px)}
@@ -114,7 +112,8 @@
     .print-only {display:none}
     footer {padding:12px clamp(18px,3vw,45px);font:.7rem Arial,sans-serif;letter-spacing:.02em;background:#0c1617;color:#95a398;border-top:1px solid #2e403c;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
     @media(max-width:930px){main{grid-template-columns:1fr}.scene{min-height:375px}.scene-heading{padding:0 28px 40px}.scene-heading h1{font-size:clamp(2.5rem,8vw,4.2rem)}.scene-top{padding:20px 27px}.story-panel{border-left:0;border-top:1px solid #47534d;min-height:460px;padding:26px}}
-    @media(max-width:520px){header{padding:13px 15px;align-items:start}.brand{gap:7px}.brand-txt{font-size:.67rem}.brand-mark{width:31px;height:31px;font-size:21px}.brand-txt small{font-size:.55rem}.mini-btn{padding:6px 8px;font-size:.68rem}.header-actions{gap:5px}.scene{min-height:315px}.scene-heading .subtitle{font-size:.96rem}.clock{font-size:.65rem}.chapter-index{font-size:.62rem}dialog{padding:18px}}
+    @media(max-width:930px){#visualStage.art-approved .scene-top{position:relative;z-index:2}#visualStage.art-approved .scene-heading{position:relative;z-index:2}#visualStage.art-ch02.art-approved .stage-art{z-index:0}#visualStage.art-ch02.art-approved .stage-art::before{display:none}#visualStage.art-ch02.art-approved .art-window{object-fit:contain;opacity:1;filter:none}#visualStage.art-ch02.art-approved::before{background:linear-gradient(180deg,#08111330 0%,transparent 38%,#08111355 100%)}}
+    @media(max-width:520px){header{padding:13px 15px;align-items:start}.brand{gap:7px}.brand-txt{font-size:.67rem}.brand-mark{width:31px;height:31px;font-size:21px}.brand-txt small{font-size:.55rem}.mini-btn{padding:6px 8px;font-size:.68rem}.header-actions{gap:5px}.scene{min-height:315px}#visualStage.art-approved .scene-top{align-items:flex-start;flex-direction:column;gap:8px;padding:14px 20px}#visualStage.art-approved .clock{white-space:normal;max-width:100%}.scene-heading .subtitle{font-size:.96rem}.clock{font-size:.65rem}.chapter-index{font-size:.62rem}dialog{padding:18px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
   </style>
 </head>
@@ -163,7 +162,6 @@
     </div>
     <div class="scene-top"><div class="chapter-index" id="stageIndex">The Baker Street Cases · No. 01</div><div class="clock" id="stageClock">London · Early April</div></div>
     <div class="scene-heading"><span class="eyebrow" id="stageEyebrow">An interactive mystery</span><h1 id="stageTitle">The Speckled<br/>Band</h1><p class="subtitle" id="stageSubtitle">Every detail matters.</p></div>
-    <span class="art-credit" id="artCredit">Original atmospheric artwork · prototype (SVG)</span>
   </section>
   <section class="story-panel" id="storyPanel" aria-label="Story and player decisions">
     <div><span class="overline" id="panelOverline">Chapter I</span><h2 class="panel-title" id="panelTitle" tabindex="-1">A Visitor at Dawn</h2><span class="flourish" aria-hidden="true">— ✦ —</span></div>

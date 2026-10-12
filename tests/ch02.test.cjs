@@ -17,7 +17,8 @@ async function open(contextOptions={}) {
     if(url.pathname==='/'||url.pathname==='/index.html') return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:fs.readFileSync(path.join(root,'index.html'),'utf8')});
     const file=path.resolve(root,`.${decodeURIComponent(url.pathname)}`);
     if(!file.startsWith(root+path.sep)||!fs.existsSync(file)) return route.fulfill({status:404,body:'Not found'});
-    return route.fulfill({status:200,contentType:file.endsWith('.js')?'text/javascript; charset=utf-8':'application/octet-stream',body:fs.readFileSync(file)});
+    const contentType=file.endsWith('.js')?'text/javascript; charset=utf-8':file.endsWith('.png')?'image/png':'application/octet-stream';
+    return route.fulfill({status:200,contentType,body:fs.readFileSync(file)});
   });
   const page=await context.newPage();
   await page.goto(pageUrl);
@@ -124,6 +125,65 @@ test('complete Chapter II browser path: six scenes, retries, four clues, Case Fi
     assert.deepEqual(saved.chapters.ch02.clues,['helen-wrist-marks','roylott-threat','bent-poker','marriage-income']);
     assert.deepEqual(pageErrors,[]);
   } finally { await context.close(); }
+});
+
+test('all six approved Chapter II illustrations use the shared stage at requested desktop and mobile viewports', async () => {
+  const scenes=[
+    ['ch02.s01.hidden-bruises','scene.case01.ch02-s01.hidden-bruises__v01__approved.png','The Man from Stoke Moran','The Hidden Bruises','A quiet moment in the Baker Street sitting room.','221B Baker Street · Morning'],
+    ['ch02.s02.difficult-puzzle','scene.case01.ch02-s02.difficult-puzzle__v01__approved.png','The Man from Stoke Moran','A Difficult Puzzle','Helen has left. The questions remain.','221B Baker Street · Morning'],
+    ['ch02.s03.unwelcome-visitor','scene.case01.ch02-s03.unwelcome-visitor__v01__approved.png','The Man from Stoke Moran','The Unwelcome Visitor','The door opens without warning.','221B Baker Street · Morning'],
+    ['ch02.s04.bent-poker','scene.case01.ch02-s04.holmes-straightens-poker__v01__approved.png','The Man from Stoke Moran','The Bent Poker','Holmes straightens the iron.','221B Baker Street · Morning'],
+    ['ch02.s05.price-of-marriage','scene.case01.ch02-s05.price-of-marriage__v01__approved.png','The Man from Stoke Moran','The Price of Marriage','Holmes has returned with the figures.','221B Baker Street · Near one o’clock'],
+    ['ch02.s06.journey-begins','scene.case01.ch02-s06.journey-begins__v01__approved.png','DEPARTURE FROM WATERLOO','The Journey Begins','The investigation moves beyond London.','Waterloo → Leatherhead']
+  ];
+  for(const viewport of [{width:1440,height:900},{width:1920,height:1080},{width:1024,height:768},{width:390,height:844}]){
+    const {context,page}=await open({viewport,reducedMotion:'reduce'});const errors=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+    try{
+      for(let index=0;index<scenes.length;index++){
+        const [sceneId,file,eyebrow,title,subtitle,clock]=scenes[index];await page.locator('#awakeningArt').evaluate(image=>image.decode());
+        const image=await page.locator('#awakeningArt').evaluate(node=>({src:node.getAttribute('src'),alt:node.alt,visible:!node.hidden&&getComputedStyle(node).display!=='none',loaded:node.complete&&node.naturalWidth===1536&&node.naturalHeight===1024,fit:getComputedStyle(node).objectFit,stage:(()=>{const r=document.querySelector('#visualStage').getBoundingClientRect();return {width:r.width,height:r.height,position:getComputedStyle(document.querySelector('#visualStage')).position};})(),blurredFill:getComputedStyle(document.querySelector('#visualStage .stage-art'),'::before').display,heading:getComputedStyle(document.querySelector('#visualStage .scene-heading')).display,title:document.querySelector('#panelTitle').textContent,stageTitle:document.querySelector('#stageTitle').textContent,eyebrow:document.querySelector('#stageEyebrow').textContent,subtitle:document.querySelector('#stageSubtitle').textContent,clock:document.querySelector('#stageClock').textContent}));
+        assert.equal(image.visible,true,`${sceneId} visible at ${viewport.width}`);assert.equal(image.loaded,true,`${sceneId} original dimensions`);assert.ok(image.src.endsWith(file),`${sceneId} selects the approved illustration`);assert.ok(image.alt.length>15,`${sceneId} descriptive alt`);assert.equal(image.title,title);assert.notEqual(image.heading,'none','the shared scene overlay is visible');assert.equal(image.stageTitle,image.title,`${sceneId} stage title matches the reading-panel title`);assert.equal(image.eyebrow,eyebrow,`${sceneId} receives its own upper label`);assert.equal(image.subtitle,subtitle,`${sceneId} receives its own subtitle`);assert.equal(image.clock,clock,`${sceneId} location and time match the scene`);
+        assert.equal(await page.locator('#artCredit').count(),0,`${sceneId} does not render the technical production caption`);assert.doesNotMatch(await page.locator('body').innerText(),/Approved scene illustration · v01/);
+        const folder=index===5?'waterloo-station':'baker-street';const response=await page.evaluate(async path=>{const result=await fetch(path);return {status:result.status,type:result.headers.get('content-type')};},`/assets/visual/variants/scenes/${folder}/${file}`);
+        assert.equal(response.status,200,`${sceneId} fixture asset response`);assert.match(response.type,/image\/png/);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth===document.documentElement.clientWidth),true,`${sceneId} no horizontal overflow`);
+        if(viewport.width>930){assert.equal(image.fit,'cover');assert.ok(Math.abs(image.stage.width/image.stage.height-1.5)<.01,`${sceneId} desktop stage is 3:2`);assert.equal(image.stage.position,'sticky','desktop stage is conditionally sticky');}
+        else{assert.equal(image.fit,'contain',`${sceneId} mobile keeps the complete approved frame`);assert.equal(image.stage.position,'relative');assert.equal(image.blurredFill,'none','the decorative blur does not cover the approved mobile image');}
+        if(index===0&&(viewport.width===1440||viewport.width===1024)){
+          const before=await page.evaluate(()=>({height:document.documentElement.scrollHeight,width:document.documentElement.scrollWidth}));
+          await page.evaluate(()=>scrollTo(0,Math.min(260,document.documentElement.scrollHeight-innerHeight)));
+          const scrolled=await page.locator('#visualStage').evaluate(node=>({top:node.getBoundingClientRect().top,bottom:node.getBoundingClientRect().bottom}));
+          assert.ok(scrolled.top>0,'the long Chapter II scene can be scrolled');assert.ok(Math.abs(scrolled.top-12)<1,'the image stage stays sticky at its top offset');assert.ok(scrolled.bottom<=viewport.height,'the full image stage remains in the viewport');
+          assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),before.width,'sticky scrolling adds no horizontal overflow');await page.evaluate(()=>scrollTo(0,0));
+        }
+        if(index===0){await page.getByRole('button',{name:/Does your wrist need care/}).click();await page.getByRole('button',{name:/Five marks are visible/}).click();await page.getByRole('button',{name:/Continue/}).click();}
+        else if(index===1){await page.getByRole('button',{name:/The whistle and her last words/}).click();await page.getByRole('button',{name:/Continue/}).click();}
+        else if(index===2){await page.getByRole('button',{name:/Say nothing/}).click();await page.getByRole('button',{name:/After Roylott leaves/}).click();}
+        else if(index===3){await page.getByRole('button',{name:/Roylott bent the poker here/}).click();await page.getByRole('button',{name:/Wait for Holmes/}).click();}
+        else if(index===4){await page.getByRole('button',{name:/A daughter’s marriage could reduce the income/}).click();await page.getByRole('button',{name:/Continue/}).click();}
+        if(index===5&&viewport.width===1440){const output=path.join(root,'artifacts','m06.3-visual-integration','s06-overlay-audit-1440x900.png');fs.mkdirSync(path.dirname(output),{recursive:true});await page.screenshot({path:output});}
+      }
+      assert.deepEqual(errors,[],'no uncaught browser errors');
+    }finally{await context.close();}
+  }
+});
+
+test('Chapter II overlay typography and spacing match the Chapter I shared stage', async () => {
+  for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
+    const {context,page}=await open({viewport,reducedMotion:'reduce'});
+    try{
+      const chapterTwoStyle=await page.evaluate(()=>{
+        const selectors=['.scene-top','#stageIndex','.clock','.scene-heading','.scene-heading .eyebrow','#stageTitle','#stageSubtitle'];
+        return selectors.map(selector=>{const node=document.querySelector(selector),style=getComputedStyle(node);return [selector,...['display','position','flexDirection','gap','fontFamily','fontSize','fontWeight','letterSpacing','lineHeight','marginTop','marginBottom','paddingTop','paddingRight','paddingBottom','paddingLeft','color','textShadow'].map(key=>style[key])];});
+      });
+      await page.goto('http://m04.test/?chapter=ch01');
+      await page.locator('#awakeningArt').evaluate(image=>image.decode());
+      const chapterOneStyle=await page.evaluate(()=>{
+        const selectors=['.scene-top','#stageIndex','.clock','.scene-heading','.scene-heading .eyebrow','#stageTitle','#stageSubtitle'];
+        return selectors.map(selector=>{const node=document.querySelector(selector),style=getComputedStyle(node);return [selector,...['display','position','flexDirection','gap','fontFamily','fontSize','fontWeight','letterSpacing','lineHeight','marginTop','marginBottom','paddingTop','paddingRight','paddingBottom','paddingLeft','color','textShadow'].map(key=>style[key])];});
+      });
+      assert.deepEqual(chapterTwoStyle,chapterOneStyle,`Chapter II stage overlay uses the same visual rules at ${viewport.width}px`);
+    }finally{await context.close();}
+  }
 });
 
 test('alternate Watson responses and challenge retries remain available in browser', async () => {

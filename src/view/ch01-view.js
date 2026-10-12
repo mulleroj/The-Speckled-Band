@@ -51,7 +51,6 @@ const wideCompositionScenes = new Set(['ch01.observations', 'ch01.testimony', 'c
     el('prototypeArt').hidden=Boolean(illustration);
     el('awakeningArt').style.display=illustration?'':'none';
     el('prototypeArt').style.display=illustration?'none':'';
-    el('artCredit').textContent=illustration?'Approved scene illustration · v01':'Original atmospheric artwork · prototype (SVG)';
     if(illustration){el('awakeningArt').src=illustration.source;el('awakeningArt').alt=illustration.alt;}
     else {el('awakeningArt').removeAttribute('src');el('awakeningArt').alt='';}
     el('choices').replaceChildren();el('primaryAction').replaceChildren();feedback('');teacher('');instruction('');

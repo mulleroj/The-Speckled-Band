@@ -6,6 +6,7 @@ import { renderTeacherNote } from '../teacher/teacher-mode.js';
 import { renderEvidenceBoard, setupCaseFileTabs } from './evidence-board.js';
 
 const ids=chapterTwo.sceneIds;
+const sceneArt = Object.values(caseManifest.media).filter(item => item.type === 'illustration' && item.sceneId && item.source && !item.source.startsWith('inline:'));
 
 export function mountChapterTwo(){
   let storage,storageUnavailable=false;try{storage=window.localStorage;}catch{storage={getItem:()=>null,setItem:()=>{throw new Error('Browser storage unavailable');}};storageUnavailable=true;}
@@ -26,10 +27,18 @@ export function mountChapterTwo(){
   const action=(text,fn,disabled=false)=>el('primaryAction').replaceChildren(makeButton(text,fn,{className:'action',disabled}));
   const feedback=(text,good=false)=>{const n=el('feedback');n.hidden=!text;n.className=good?'feedback good':'feedback';n.textContent=text||'';};
   const teacher=(attempted=false)=>renderTeacherNote(el('teacherNote'),state.teacher,attempted?chapterTwo.teacherAfter[ids[sceneNo()]]:chapterTwo.teacherNotes[ids[sceneNo()]]);
-  function header(title,subtitle,time='221B Baker Street · Morning'){
-    el('stageEyebrow').textContent='The Man from Stoke Moran';el('stageTitle').textContent='The Speckled Band';el('stageSubtitle').textContent=subtitle;
-    el('panelOverline').textContent=`Chapter II · Scene ${sceneNo()+1}/6`;el('panelTitle').textContent=title;el('stageClock').textContent=time;
-    el('stageIndex').textContent='The Baker Street Cases · No. 01 · Chapter II';el('progress').style.width=`${Math.round(((sceneNo()+1)/6)*100)}%`;el('visualStage').className='scene art-client';
+  function header(){
+    const metadata=chapterTwo.overlayCopy[state.sceneId];const title=chapterTwo.scenes[state.sceneId].title;
+    el('stageEyebrow').textContent=metadata.eyebrow;el('stageTitle').textContent=title;el('stageSubtitle').textContent=metadata.subtitle;
+    el('panelOverline').textContent=`Chapter II · Scene ${sceneNo()+1}/6`;el('panelTitle').textContent=title;el('stageClock').textContent=metadata.clock;
+    el('stageIndex').textContent=`Chapter II · Scene ${sceneNo()+1}/6`;el('progress').style.width=`${Math.round(((sceneNo()+1)/6)*100)}%`;
+    const illustration=sceneArt.find(item=>item.sceneId===state.sceneId);
+    el('visualStage').className='scene art-client art-ch02'+(illustration?' art-approved art-wide-stage':'');
+    el('visualStage').querySelector('.stage-art').style.setProperty('--scene-art-bg',illustration?`url("${illustration.source}")`:'none');
+    el('awakeningArt').hidden=!illustration;el('prototypeArt').hidden=Boolean(illustration);
+    el('awakeningArt').style.display=illustration?'':'none';el('prototypeArt').style.display=illustration?'none':'';
+    if(illustration){el('awakeningArt').src=illustration.source;el('awakeningArt').alt=illustration.alt;}
+    else{el('awakeningArt').removeAttribute('src');el('awakeningArt').alt='';}
   }
   function next(){const target=ids[sceneNo()+1];if(!target)return;const moved=transitionToScene(state,target);if(moved.sceneId===state.sceneId)return;state={...moved,chapters:history};save();render();window.scrollTo({top:0,behavior:'instant'});el('panelTitle').focus();}
   function grant(id){state=acquireEvidence(state,id,chapterTwo.evidenceGrants[id]);el('badge').textContent=String(state.clues.length);}
@@ -46,7 +55,7 @@ export function mountChapterTwo(){
     el('choices').replaceChildren();el('primaryAction').replaceChildren();feedback('');teacher(false);el('instruction').textContent='';
     switch(n){
       case 0:{
-        grant('helen-wrist-marks');header('The Hidden Bruises','A quiet moment in the Baker Street sitting room.');
+        grant('helen-wrist-marks');header();
         copy(chapterTwo.story.s01Opening);
         if(!state.choices['ch02.s01.response']){
           el('instruction').textContent='Choose how Watson responds. Helen decides what she wants to share.';
@@ -63,13 +72,13 @@ export function mountChapterTwo(){
         teacher(Boolean(state.answer));break;
       }
       case 1:{
-        header('A Difficult Puzzle','Helen has left. The questions remain.');copy(chapterTwo.story.s02Opening);el('instruction').textContent=chapterTwoChallenges.prompts.puzzle;
+        header();copy(chapterTwo.story.s02Opening);el('instruction').textContent=chapterTwoChallenges.prompts.puzzle;
         attempt('ch02.s02.hypothesis',chapterTwoChallenges.puzzle);
         if(state.answer){copy(chapterTwo.story.s02Opening,chapterTwo.story.s02AfterAttempt);action('Continue →',next);}
         teacher(Boolean(state.answer));break;
       }
       case 2:{
-        grant('roylott-threat');grant('bent-poker');header('The Unwelcome Visitor','The door opens without warning.');copy(chapterTwo.story.s03Opening);
+        grant('roylott-threat');grant('bent-poker');header();copy(chapterTwo.story.s03Opening);
         if(!state.choices['ch02.s03.response']){
           el('instruction').textContent='Choose Watson’s response. Neither choice changes Roylott’s actions.';
           el('choices').dataset.choiceGroupId='ch02.s03.response';setChoices(...chapterTwo.interfaceCopy.s03Choices.map((option,i)=>{const b=makeButton(option.label,()=>choice('ch02.s03.response',option.id,option.feedback,()=>el('choices').querySelector('button')?.focus()),{number:String.fromCharCode(65+i)});b.dataset.choiceId=option.id;return b;}));
@@ -77,19 +86,19 @@ export function mountChapterTwo(){
         teacher(false);break;
       }
       case 3:{
-        header('The Bent Poker','Holmes straightens the iron.');copy(chapterTwo.story.s04Opening);el('instruction').textContent=chapterTwoChallenges.prompts.poker;
+        header();copy(chapterTwo.story.s04Opening);el('instruction').textContent=chapterTwoChallenges.prompts.poker;
         attempt('ch02.challenge.s04.observation-or-proof',chapterTwoChallenges.poker);
         if(state.answer){copy(chapterTwo.story.s04Opening,chapterTwo.story.s04AfterAttempt);action('Wait for Holmes →',next);}
         teacher(Boolean(state.answer));break;
       }
       case 4:{
-        grant('marriage-income');header('The Price of Marriage','Holmes has returned with the figures.','221B Baker Street · Near one o’clock');copy(chapterTwo.story.s05Opening);el('instruction').textContent=chapterTwoChallenges.prompts.motive;
+        grant('marriage-income');header();copy(chapterTwo.story.s05Opening);el('instruction').textContent=chapterTwoChallenges.prompts.motive;
         attempt('ch02.challenge.s05.motive-not-proof',chapterTwoChallenges.motive);
         if(state.answer==='correct'){copy(chapterTwo.story.s05Opening,chapterTwo.story.s05AfterAttempt);action('Continue →',next);}
         teacher(Boolean(state.answer));break;
       }
       default:{
-        header('The Journey Begins',state.completed?'London slips behind the train.':'Prepare to leave Baker Street.','Baker Street → Waterloo');copy(chapterTwo.story.s06Opening);el('instruction').textContent=chapterTwoChallenges.prompts.next;
+        header();copy(chapterTwo.story.s06Opening);el('instruction').textContent=chapterTwoChallenges.prompts.next;
         el('choices').dataset.choiceGroupId='ch02.s06.next-question';setChoices(...chapterTwo.interfaceCopy.s06Choices.map((option,i)=>{const b=makeButton(option.label,()=>{state.choices['ch02.s06.next-question']=option.id;state.completed=true;state.feedback='Keep your eyes open and your notes clear, Watson.';save();render();el('choices').children[i]?.focus();},{number:String.fromCharCode(65+i)});b.dataset.choiceId=option.id;return b;}));
         if(state.choices['ch02.s06.next-question']){feedback(state.feedback,true);copy(chapterTwo.story.s06Opening,chapterTwo.story.s06Departure);action('Review the Case File',openCase);el('primaryAction').append(makeButton('Choose another chapter',()=>el('chapterBtn').click(),{className:'action ghost'}));}
         teacher(Boolean(state.choices['ch02.s06.next-question']));break;
